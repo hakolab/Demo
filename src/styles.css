@@ -1,0 +1,134 @@
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+html body {
+  width: 100%;
+  background-color: white;
+  margin: 0;
+}
+
+h1 {
+  margin-bottom: 2px;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+#piano-roll {
+  border: 1px solid silver;
+  background-color: white;
+}
+
+#piano-roll * {
+  box-sizing: border-box;
+}
+
+.octave {
+  /*height: 252px;*/
+  display: flex;
+  margin-bottom: 5px;
+}
+
+.keyboard {
+  position: relative;
+}
+
+.keyboard > div {
+  border: 1px solid black;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+
+.white-key {
+  width: 95px;
+  height: 36px;
+  background-color: white;
+}
+
+.b-key-common {
+  width: 55px;
+  height: 21px;
+  background-color: #696969;
+  z-index: 1;
+  position: absolute;
+  border: 1px solid gray;
+}
+
+.si-flat {
+  top: 21px;
+  left: 0px;
+}
+
+.la-flat {
+  top: 63px;
+  left: 0px;
+}
+
+.so-flat {
+  top: 105px;
+  left: 0px;
+}
+
+.mi-flat {
+  top: 168px;
+  left: 0px;
+}
+
+.re-flat {
+  top: 210px;
+  left: 0px;
+}
+
+.grid {
+  display: table;
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.row {
+  display: table-row;
+  height: 20px;
+  /* border-collapse: collapse; */
+}
+
+.row > div {
+  display: table-cell;
+  border: 1px solid #b0c4de;
+  /* border-collapse: collapse; */
+}
+
+/*
+.w-key.active {
+  background-color: #e7feff;
+}
+
+.active-current {
+  background-color: #f5deb3;
+}
+
+.now {
+  background-color: #eff7ff;
+}
+*/
+/* tr:nth-child(odd) {
+  background-color: #e7feff;
+}
+
+tr:nth-child(even) {
+  background-color: #d4f1f9;
+} */
+/*
+レイアウトはとりあえずこれでOK
+懸念点は描画スピード。鍵盤が増えたり、尺が伸びたときの影響が心配。
+
+次にやること
+・ローカルにうつして、Git管理しようかな？
+・マウスホバー、currentStep で明度を上げる
+・音によって色を変える　
+.active:nth-child(11) でできるかな？
+
+*/

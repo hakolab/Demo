@@ -25,10 +25,6 @@ module.exports = {
          }
         },
         {
-          test: /\.scss$/,
-          use: "style!css!autoprefixer-loader!sass"
-        },
-        {
           test: /\.tsx?$/,
           use: "ts-loader",
         },
@@ -38,7 +34,15 @@ module.exports = {
             {loader: 'style-loader'},
             {loader: 'css-loader'}
           ]
-       }
+        },
+        {
+          test: /\.scss$/,
+          use: [
+            {loader: 'style-loader'},
+            {loader: 'css-loader'},
+            {loader: 'sass-loader'}
+          ]
+        },
     ],
  },
  resolve: {

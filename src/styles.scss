@@ -1,0 +1,40 @@
+$bKeyIndex: 2,4,6,9,11;
+@each $index in $bKeyIndex {
+  .grid .row:nth-child(#{$index}) {
+    background-color: #f5f5f5;
+  }
+}
+
+.w-key {
+  .active {
+    //background-color: #e7feff;
+    background-color: #FCEDAA;
+  }
+
+  .now {
+    //background-color: #eff7ff;
+    background-color: #eff7ff;
+  }
+
+  .active.now {
+    //background-color: #f5deb3;
+    background-color: #FCF1D3;
+  }
+}
+
+.b-key {
+  .active {
+    background-color: #ECACB5;
+  }
+
+  .now {
+    background-color: #D5E0F1;
+  }
+
+  .active.now {
+    background-color: #F6D4D8;
+  }
+
+  // 白鍵と黒鍵は隣接色彩で
+  // アクティブとカレントのときは、同じ彩度の変化幅で
+}
