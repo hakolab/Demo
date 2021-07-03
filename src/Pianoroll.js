@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import * as Tone from "tone";
 import { Slider } from "@material-ui/core";
-import { getInitialPlayNotes } from "./data";
+import { keyboard76, oneOctave, toyPiano } from "./data";
 import './styles.css'
 import './styles.scss'
 
@@ -10,25 +10,10 @@ const config = {
   noteCount: 8
 };
 
-const initialNoteData = getInitialPlayNotes("oneOctave");
-
-function getNotes(noteCount) {
-  let notes = [];
-  let i = 0;
-  while (i < noteCount) {
-    notes.push(false);
-    i++;
-  }
-  return notes.slice();
-}
-
 const steps = new Array(config.noteCount).fill(null).map((_, i) => i);
 
 /*
 コントローラーを作成
-
-・Resetボタン
-・play, stop を交互に表示
 
 動的に鍵盤を表示
 ・てっぺんのド
@@ -43,11 +28,14 @@ const steps = new Array(config.noteCount).fill(null).map((_, i) => i);
 
 const sequencer = new Tone.Sequence();
 
+const bKeyIndex = [1, 3, 5, 8, 10];
+
 export default function Pianoroll() {
-  const [tones, setTones] = useState(initialNoteData.tones);
+  const [tones, setTones] = useState(keyboard76);
   const [notes, setNotes] = useState(
-    initialNoteData.tones.map((_) => new Array(config.noteCount).fill(false))
+    tones.map(octave => octave.tones.map(tones =>  new Array(config.noteCount).fill(false)))
   );
+  //console.log(notes)
   const [isPlaying, setIsPlaying] = useState(Tone.Transport.state);
   //console.log(`state is ${isPlaying}`);
   const [currentStep, setCurrentStep] = useState();
@@ -55,55 +43,41 @@ export default function Pianoroll() {
   const [bpm, setBpm] = useState(Tone.Transport.bpm.value);
   const [isChanging, setIsChanging] = useState(false);
 
-  function handleMouseDown(event, row, col) {
+  function handleMouseDown(event, octave, row, col) {
     // 要素をドラッグしようとするのを防ぐ
     event.preventDefault();
 
-    //console.log(`mouse down on ${row}:${col}`);
+    console.log(`mouse down on ${row}:${col} of ${octave}`);
 
-    const newNotes = notes.slice();
-    const current = newNotes[row][col];
-    newNotes[row][col] = !current;
+    const newNotes = notes.slice()//JSON.parse(JSON.stringify(notes));
+    const current = newNotes[octave][row][col];
+    newNotes[octave][row][col] = !current;
     setNotes(newNotes);
   }
 
-  function handleMouseEnter(event, row, col) {
+  function handleMouseEnter(event, octave, row, col) {
     //console.log(`mouse enter on ${row}:${col}`);
     // 左クリックされていなければ return
     if (event.buttons !== 1) {
       return;
     }
+    console.log('enter')
     // テンポ変更中のときは return
     if (isChanging) {
       return;
     }
 
     event.preventDefault();
-    const newNotes = notes.slice();
-    const current = newNotes[row][col];
-    newNotes[row][col] = !current;
+    const newNotes = notes.slice()//JSON.parse(JSON.stringify(notes));
+    const current = newNotes[octave][row][col];
+    newNotes[octave][row][col] = !current;
     setNotes(newNotes);
   }
 
-  //console.log("test");
-  /* sequencer.callback = (time, step) => {
-    const synth = new Tone.PolySynth().toDestination();
-    const playNotes = getPlayNotes(step);
-    //console.log(step);
-    synth.triggerAttackRelease(playNotes, "8t", time);
-    setCurrentStep(step);
-  };
-  sequencer.events = steps;
-  sequencer.start(0);
-
-  function start() {
-    Tone.start()
-    Tone.Transport.start();
-    setIsPlaying(Tone.Transport.state);
-  } */
-
   useEffect(() => {
-    console.log(Tone.Transport.state)
+    if(Tone.Transport.state === "stopped"){
+
+    }
   },[Tone.Transport.state])
 
   function start() {
@@ -117,29 +91,42 @@ export default function Pianoroll() {
     setIsPlaying(Tone.Transport.state);
 
     function dispose() {
+      console.log('dispose')
       seq.dispose();
-      document.getElementById("stop").removeEventListener("click", dispose);
-      document.getElementById("reset").removeEventListener("click", dispose);
+      Tone.Transport.off('stop', dispose)
     }
 
-    document.getElementById("stop").addEventListener("click", dispose);
-    document.getElementById("reset").addEventListener("click", dispose);
+    Tone.Transport.on('stop', dispose)
   }
 
   function stop() {
     Tone.Transport.stop();
     setCurrentStep(null);
+    setIsPlaying(Tone.Transport.state);
   }
 
   function getPlayNotes(step) {
     let playNotes = [];
 
-    notes.forEach((data, index) => {
+    notes.forEach((octave, octIndex) => {
+      octave.forEach((notes, rowIndex) => {
+        if(notes[step]){
+          console.log(notes[step])
+          console.log(tones[octIndex].tones[step]);
+          console.log(`${tones[octIndex].tones[rowIndex].pitchName}${tones[octIndex].octave}`);
+          playNotes.push(`${tones[octIndex].tones[rowIndex].pitchName}${tones[octIndex].octave}`);
+        }
+      })
+    })
+
+/*     notes.forEach((octave, index) => octave.forEach(data => {
+      console.log(data[step])
       if (data[step]) {
         //console.log(`${tones[index].pitchName}${tones[index].octave}`);
-        playNotes.push(`${tones[index].pitchName}${tones[index].octave}`);
+        //playNotes.push(`${tones[index].pitchName}${tones[index].octave}`);
       }
-    });
+    })); */
+
     return playNotes;
   }
 
@@ -151,31 +138,29 @@ export default function Pianoroll() {
   function reset() {
     stop();
     setNotes(
-      initialNoteData.tones.map((_) => new Array(config.noteCount).fill(false))
+      tones.map(octave => octave.tones.map(tones =>  new Array(config.noteCount).fill(false)))
     );
     setBpm(120);
 
     Tone.Transport.bpm.value = 120;
   }
 
-  function show() {
-    console.log(Tone.getContext());
-  }
-
   return (
     <div id="piano-roll">
       <div id="controller">
-        <button type="button" style={{ margin: "5px" }} onClick={start}>
-          start
-        </button>
-        <button id="stop" type="button" style={{ margin: "5px" }} onClick={stop}>
-          stop
-        </button>
+        {
+          isPlaying === "stopped"
+          ? <button type="button" style={{ margin: "5px" }} onClick={start}>
+              start
+            </button>
+          : <button id="stop" type="button" style={{ margin: "5px" }} onClick={stop}>
+              stop
+            </button>
+        }
+        
+        
         <button id="reset" type="button" style={{ margin: "5px" }} onClick={reset}>
           reset
-        </button>
-        <button type="button" style={{ margin: "5px" }} onClick={show}>
-          show
         </button>
         <div style={{ width: "200px", margin: "auto" }}>
           <Slider
@@ -187,6 +172,85 @@ export default function Pianoroll() {
             onChangeCommitted={() => setIsChanging(false)}
           />
           {bpm}
+        </div>
+      </div>
+      {
+        tones.map((octave, index) => {
+          return (
+            <div className="octave">
+              <div className="keyboard">
+                {
+                  octave.tones.map((tone, rowIndex) => {
+                    let rowClassName = octave.bKeyIndex.indexOf(rowIndex) >= 0 ? "black-key-common" : "white-key";
+                    if(index === 0){
+                      rowClassName += ' top'
+                    }
+                    if(octave.tones.length === 1){
+                      rowClassName += ' only'
+                    }
+                    return (
+                      <div className={`${rowClassName} ${tone.pitchName}`}></div>
+                    )
+                  })
+                }
+              </div>
+              <div className="grid">
+                {
+                  octave.tones.map((tone, rowIndex) => {
+                    let rowClassName =　octave.bKeyIndex.indexOf(rowIndex) >= 0 ? "b-key" : "w-key";
+                    return (
+                      <div className={`row ${rowClassName}`}>
+                        {
+                          notes[index][rowIndex].map((note, colIndex) => {
+                            // 選択されているか
+                            //console.log(note)
+                            let cellClassName = note ? "active" : "";
+
+                            // シーケンサーがいまのステップか
+                            if (currentStep === colIndex) {
+                              cellClassName = cellClassName + " now";
+                            }
+                            return (
+                              <div
+                                key={`${tone.pitchName}${tone.octave}${colIndex}`}
+                                onMouseDown={(event) =>
+                                  handleMouseDown(event, index, rowIndex, colIndex)
+                                }
+                                onMouseEnter={(event) =>
+                                  handleMouseEnter(event, index, rowIndex, colIndex)
+                                }
+                                className={cellClassName}
+                              ></div>
+                            )
+                          })
+                        }
+                      </div>
+                    )
+                  })
+                }
+              </div>
+            </div>
+          )
+        })
+
+      }
+
+
+{/*       <div className="top-note">
+        <div className="keyboard">
+          <div className="white-key top"></div>
+        </div>
+        <div className="grid">
+          <div className="row">
+            <div className="w-key"></div>
+            <div className="w-key"></div>
+            <div className="w-key"></div>
+            <div className="w-key"></div>
+            <div className="w-key"></div>
+            <div className="w-key"></div>
+            <div className="w-key"></div>
+            <div className="w-key"></div>
+          </div>
         </div>
       </div>
       <div className="octave">
@@ -240,43 +304,7 @@ export default function Pianoroll() {
             );
           })}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }
-
-/**
-const data = [
-  { pitchName: "B", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "Bb", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "A", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "Ab", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "G", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "Gb", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "F", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "E", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "Eb", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "D", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "Db", octave: 4, notes: getNotes(config.noteCount) },
-  { pitchName: "C", octave: 4, notes: getNotes(config.noteCount) }
-];
- */
-
-/* 
-  useEffect(() => {
-    const synth = new Tone.PolySynth().toDestination();
-    const seq = new Tone.Sequence((time, step) => {
-      const playNotes = getPlayNotes(step);
-      console.log(playNotes);
-      synth.triggerAttackRelease(playNotes, "8t", time);
-      setCurrentStep(step);
-    }, steps).start(0);
-
-   document.getElementById("stop").addEventListener("click", seqClear);
-
-    function seqClear() {
-      seq.stop();
-      seq.clear();
-      seq.dispose();
-    } 
-  }, []); */

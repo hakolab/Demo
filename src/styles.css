@@ -26,10 +26,9 @@ h2 {
   box-sizing: border-box;
 }
 
-.octave {
+.octave, .top-note {
   /*height: 252px;*/
   display: flex;
-  margin-bottom: 5px;
 }
 
 .keyboard {
@@ -43,12 +42,12 @@ h2 {
 }
 
 .white-key {
-  width: 95px;
+  width: 55px;
   height: 36px;
   background-color: white;
 }
 
-.b-key-common {
+.black-key-common {
   width: 55px;
   height: 21px;
   background-color: #696969;
@@ -57,28 +56,51 @@ h2 {
   border: 1px solid gray;
 }
 
-.si-flat {
+.C.top {
+
+}
+
+.C.top.only {
+  height: 21px !important;
+}
+
+.Bb {
   top: 21px;
   left: 0px;
 }
 
-.la-flat {
+.Ab {
   top: 63px;
   left: 0px;
 }
 
-.so-flat {
+.Gb {
   top: 105px;
   left: 0px;
 }
 
-.mi-flat {
+.black-key-common.Gb.top {
+  top: 23px;
+  left: 0px;
+}
+
+.Eb {
   top: 168px;
   left: 0px;
 }
 
-.re-flat {
+.black-key-common.Eb.top {
+  top: 105px;
+  left: 0px;
+}
+
+.Db {
   top: 210px;
+  left: 0px;
+}
+
+.black-key-common.Db.top {
+  top: 147px;
   left: 0px;
 }
 

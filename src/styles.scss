@@ -1,9 +1,4 @@
-$bKeyIndex: 2,4,6,9,11;
-@each $index in $bKeyIndex {
-  .grid .row:nth-child(#{$index}) {
-    background-color: #f5f5f5;
-  }
-}
+
 
 .w-key {
   .active {
@@ -23,6 +18,9 @@ $bKeyIndex: 2,4,6,9,11;
 }
 
 .b-key {
+  &.row {
+    background-color: #f5f5f5;
+  }
   .active {
     background-color: #ECACB5;
   }
