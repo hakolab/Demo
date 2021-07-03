@@ -31,23 +31,15 @@ h2 {
   display: flex;
 }
 
-.keyboard {
-  position: relative;
-}
 
-.keyboard > div {
-  border: 1px solid black;
-  border-top-right-radius: 3px;
-  border-bottom-right-radius: 3px;
-}
 
 .white-key {
-  width: 55px;
+  width: 95px;
   height: 36px;
   background-color: white;
 }
 
-.black-key-common {
+.black-key {
   width: 55px;
   height: 21px;
   background-color: #696969;
@@ -56,72 +48,7 @@ h2 {
   border: 1px solid gray;
 }
 
-.C.top {
 
-}
-
-.C.top.only {
-  height: 21px !important;
-}
-
-.Bb {
-  top: 21px;
-  left: 0px;
-}
-
-.Ab {
-  top: 63px;
-  left: 0px;
-}
-
-.Gb {
-  top: 105px;
-  left: 0px;
-}
-
-.black-key-common.Gb.top {
-  top: 23px;
-  left: 0px;
-}
-
-.Eb {
-  top: 168px;
-  left: 0px;
-}
-
-.black-key-common.Eb.top {
-  top: 105px;
-  left: 0px;
-}
-
-.Db {
-  top: 210px;
-  left: 0px;
-}
-
-.black-key-common.Db.top {
-  top: 147px;
-  left: 0px;
-}
-
-.grid {
-  display: table;
-  width: 100%;
-  border-spacing: 0;
-  border-collapse: collapse;
-}
-
-.row {
-  display: table-row;
-  height: 20px;
-  /* border-collapse: collapse; */
-}
-
-.row > div {
-  display: table-cell;
-  border: 1px solid #b0c4de;
-  /* border-collapse: collapse; */
-}
 
 /*
 .w-key.active {

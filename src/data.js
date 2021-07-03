@@ -3,9 +3,10 @@ const config = {
   noteCount: 8
 };
 
-export const toyPiano = [
+export const toyPiano = {
+  mode: "toyPiano",
+  data: [
   {
-    mode: "toyPiano",
     octave: 8,
     bKeyIndex: [],
     tones: [
@@ -14,6 +15,7 @@ export const toyPiano = [
   },
   {
     octave: 7,
+    bKeyIndex: [1, 3, 5, 8, 10],
     tones: [
       { pitchName: "B" },
       { pitchName: "Bb" },
@@ -49,7 +51,7 @@ export const toyPiano = [
   },
   {
     octave: 5,
-    bKeyIndex: [1, 3, 5, 8, 10],
+    bKeyIndex: [1, 3, 5],
     tones: [
       { pitchName: "B" },
       { pitchName: "Bb" },
@@ -61,157 +63,162 @@ export const toyPiano = [
     ]
   },
 ]
+}
 
-export const oneOctave = [
-  {
-    mode: "oneOctave",
-    octave: 5,
-    bKeyIndex: [],
-    tones: [
-      { pitchName: "C" }
-    ]
-  },
-  {
-    octave: 4,
-    tones: [
-      { pitchName: "B" },
-      { pitchName: "Bb" },
-      { pitchName: "A" },
-      { pitchName: "Ab" },
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" },
-      { pitchName: "Eb" },
-      { pitchName: "D" },
-      { pitchName: "Db" },
-      { pitchName: "C" }
-    ]
-  }
-];
+export const oneOctave = {
+  mode: "oneOctave",
+  data: [
+    {
+      octave: 5,
+      bKeyIndex: [],
+      tones: [
+        { pitchName: "C" }
+      ]
+    },
+    {
+      octave: 4,
+      bKeyIndex: [1, 3, 5, 8, 10],
+      tones: [
+        { pitchName: "B" },
+        { pitchName: "Bb" },
+        { pitchName: "A" },
+        { pitchName: "Ab" },
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" },
+        { pitchName: "Eb" },
+        { pitchName: "D" },
+        { pitchName: "Db" },
+        { pitchName: "C" }
+      ]
+    }
+  ]
+}
 
-export const keyboard76 = [
-  {
-    mode: "keyboard76",
-    octave: 7,
-    bKeyIndex: [1, 4, 6],
-    tones: [
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" },
-      { pitchName: "Eb" },
-      { pitchName: "D" },
-      { pitchName: "Db" },
-      { pitchName: "C" }
-    ]
-  },
-  {
-    octave: 6,
-    bKeyIndex: [1, 3, 5, 8, 10],
-    tones: [
-      { pitchName: "B" },
-      { pitchName: "Bb" },
-      { pitchName: "A" },
-      { pitchName: "Ab" },
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" },
-      { pitchName: "Eb" },
-      { pitchName: "D" },
-      { pitchName: "Db" },
-      { pitchName: "C" }
-    ]
-  },
-  {
-    octave: 5,
-    bKeyIndex: [1, 3, 5, 8, 10],
-    tones: [
-      { pitchName: "B" },
-      { pitchName: "Bb" },
-      { pitchName: "A" },
-      { pitchName: "Ab" },
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" },
-      { pitchName: "Eb" },
-      { pitchName: "D" },
-      { pitchName: "Db" },
-      { pitchName: "C" }
-    ]
-  },
-  {
-    octave: 4,
-    bKeyIndex: [1, 3, 5, 8, 10],
-    tones: [
-      { pitchName: "B" },
-      { pitchName: "Bb" },
-      { pitchName: "A" },
-      { pitchName: "Ab" },
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" },
-      { pitchName: "Eb" },
-      { pitchName: "D" },
-      { pitchName: "Db" },
-      { pitchName: "C" }
-    ]
-  },
-  {
-    octave: 3,
-    bKeyIndex: [1, 3, 5, 8, 10],
-    tones: [
-      { pitchName: "B" },
-      { pitchName: "Bb" },
-      { pitchName: "A" },
-      { pitchName: "Ab" },
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" },
-      { pitchName: "Eb" },
-      { pitchName: "D" },
-      { pitchName: "Db" },
-      { pitchName: "C" }
-    ]
-  },
-  {
-    octave: 2,
-    bKeyIndex: [1, 3, 5, 8, 10],
-    tones: [
-      { pitchName: "B" },
-      { pitchName: "Bb" },
-      { pitchName: "A" },
-      { pitchName: "Ab" },
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" },
-      { pitchName: "Eb" },
-      { pitchName: "D" },
-      { pitchName: "Db" },
-      { pitchName: "C" }
-    ]
-  },
-  {
-    octave: 1,
-    bKeyIndex: [1, 3, 5],
-    tones: [
-      { pitchName: "B" },
-      { pitchName: "Bb" },
-      { pitchName: "A" },
-      { pitchName: "Ab" },
-      { pitchName: "G" },
-      { pitchName: "Gb" },
-      { pitchName: "F" },
-      { pitchName: "E" }
-    ]
-  },
-]
-
+export const keyboard76 = {
+  mode: "keyboard76",
+  data: [
+    {
+      octave: 7,
+      bKeyIndex: [1, 4, 6],
+      tones: [
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" },
+        { pitchName: "Eb" },
+        { pitchName: "D" },
+        { pitchName: "Db" },
+        { pitchName: "C" }
+      ]
+    },
+    {
+      octave: 6,
+      bKeyIndex: [1, 3, 5, 8, 10],
+      tones: [
+        { pitchName: "B" },
+        { pitchName: "Bb" },
+        { pitchName: "A" },
+        { pitchName: "Ab" },
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" },
+        { pitchName: "Eb" },
+        { pitchName: "D" },
+        { pitchName: "Db" },
+        { pitchName: "C" }
+      ]
+    },
+    {
+      octave: 5,
+      bKeyIndex: [1, 3, 5, 8, 10],
+      tones: [
+        { pitchName: "B" },
+        { pitchName: "Bb" },
+        { pitchName: "A" },
+        { pitchName: "Ab" },
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" },
+        { pitchName: "Eb" },
+        { pitchName: "D" },
+        { pitchName: "Db" },
+        { pitchName: "C" }
+      ]
+    },
+    {
+      octave: 4,
+      bKeyIndex: [1, 3, 5, 8, 10],
+      tones: [
+        { pitchName: "B" },
+        { pitchName: "Bb" },
+        { pitchName: "A" },
+        { pitchName: "Ab" },
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" },
+        { pitchName: "Eb" },
+        { pitchName: "D" },
+        { pitchName: "Db" },
+        { pitchName: "C" }
+      ]
+    },
+    {
+      octave: 3,
+      bKeyIndex: [1, 3, 5, 8, 10],
+      tones: [
+        { pitchName: "B" },
+        { pitchName: "Bb" },
+        { pitchName: "A" },
+        { pitchName: "Ab" },
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" },
+        { pitchName: "Eb" },
+        { pitchName: "D" },
+        { pitchName: "Db" },
+        { pitchName: "C" }
+      ]
+    },
+    {
+      octave: 2,
+      bKeyIndex: [1, 3, 5, 8, 10],
+      tones: [
+        { pitchName: "B" },
+        { pitchName: "Bb" },
+        { pitchName: "A" },
+        { pitchName: "Ab" },
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" },
+        { pitchName: "Eb" },
+        { pitchName: "D" },
+        { pitchName: "Db" },
+        { pitchName: "C" }
+      ]
+    },
+    {
+      octave: 1,
+      bKeyIndex: [1, 3, 5],
+      tones: [
+        { pitchName: "B" },
+        { pitchName: "Bb" },
+        { pitchName: "A" },
+        { pitchName: "Ab" },
+        { pitchName: "G" },
+        { pitchName: "Gb" },
+        { pitchName: "F" },
+        { pitchName: "E" }
+      ]
+    },
+  ]
+}
 /* const oneOctave = [
   { pitchName: "B", octave: 4 },
   { pitchName: "Bb", octave: 4 },

@@ -33,7 +33,7 @@ const bKeyIndex = [1, 3, 5, 8, 10];
 export default function Pianoroll() {
   const [tones, setTones] = useState(keyboard76);
   const [notes, setNotes] = useState(
-    tones.map(octave => octave.tones.map(tones =>  new Array(config.noteCount).fill(false)))
+    tones.data.map(octave => octave.tones.map(tones =>  new Array(config.noteCount).fill(false)))
   );
   //console.log(notes)
   const [isPlaying, setIsPlaying] = useState(Tone.Transport.state);
@@ -111,10 +111,10 @@ export default function Pianoroll() {
     notes.forEach((octave, octIndex) => {
       octave.forEach((notes, rowIndex) => {
         if(notes[step]){
-          console.log(notes[step])
-          console.log(tones[octIndex].tones[step]);
-          console.log(`${tones[octIndex].tones[rowIndex].pitchName}${tones[octIndex].octave}`);
-          playNotes.push(`${tones[octIndex].tones[rowIndex].pitchName}${tones[octIndex].octave}`);
+          //console.log(notes[step])
+          //console.log(tones.data[octIndex].tones[step]);
+          //console.log(`${tones.data[octIndex].tones[rowIndex].pitchName}${tones.data[octIndex].octave}`);
+          playNotes.push(`${tones.data[octIndex].tones[rowIndex].pitchName}${tones.data[octIndex].octave}`);
         }
       })
     })
@@ -138,7 +138,7 @@ export default function Pianoroll() {
   function reset() {
     stop();
     setNotes(
-      tones.map(octave => octave.tones.map(tones =>  new Array(config.noteCount).fill(false)))
+      tones.data.map(octave => octave.tones.map(tones =>  new Array(config.noteCount).fill(false)))
     );
     setBpm(120);
 
@@ -175,19 +175,24 @@ export default function Pianoroll() {
         </div>
       </div>
       {
-        tones.map((octave, index) => {
+        tones.data.map((octave, index) => {
           return (
             <div className="octave">
-              <div className="keyboard">
+              <div className={`keyboard ${tones.mode}`}>
                 {
                   octave.tones.map((tone, rowIndex) => {
-                    let rowClassName = octave.bKeyIndex.indexOf(rowIndex) >= 0 ? "black-key-common" : "white-key";
+                    let rowClassName = octave.bKeyIndex.indexOf(rowIndex) >= 0 ? "black-key" : "white-key";
+                    // 最高音域の場合は .top を設定
                     if(index === 0){
                       rowClassName += ' top'
                     }
-                    if(octave.tones.length === 1){
-                      rowClassName += ' only'
+                    // 最低音域の場合は、 .bottom を設定
+                    if((tones.data.length - 1) === index){
+                      rowClassName += ' bottom'
                     }
+                    /* if(octave.tones.length === 1){
+                      rowClassName += ' only'
+                    } */
                     return (
                       <div className={`${rowClassName} ${tone.pitchName}`}></div>
                     )

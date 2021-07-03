@@ -1,4 +1,96 @@
+.keyboard {
+  position: relative;
 
+  > div {
+    border: 1px solid black;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
+
+  &.oneOctave {
+    > .C.top {
+      height: 21px !important;
+    }
+
+  }
+
+  &.toyPiano {
+    > .C.top {
+      height: 21px !important;
+    } 
+  }
+
+  &.keyboard76 {
+    .Gb.top {
+      top: 32px;
+      left: 0px;
+    }
+
+    .Eb.top {
+      top: 96px;
+      left: 0px;
+    }
+
+    .Db.top {
+      top: 138px;
+      left: 0px;
+    }
+
+    .E.bottom {
+      height: 21px !important;
+    }
+  }
+}
+
+.Bb {
+  top: 21px;
+  left: 0px;
+}
+
+.Ab {
+  top: 63px;
+  left: 0px;
+}
+
+.Gb {
+  top: 105px;
+  left: 0px;
+}
+
+
+
+.Eb {
+  top: 168px;
+  left: 0px;
+}
+
+
+
+.Db {
+  top: 210px;
+  left: 0px;
+}
+
+
+
+.grid {
+  display: table;
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+
+.row {
+  display: table-row;
+  height: 20px;
+  /* border-collapse: collapse; */
+}
+
+.row > div {
+  display: table-cell;
+  border: 1px solid #b0c4de;
+  /* border-collapse: collapse; */
+}
 
 .w-key {
   .active {
