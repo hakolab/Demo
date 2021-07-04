@@ -1,3 +1,120 @@
+.two-four > .row > div {
+  &:nth-child(even) {
+    border-right: 1px solid #4682b4;
+  }
+
+  &:nth-child(4n) {
+    border-right: 2px solid #4682b4;
+  }
+}
+
+.three-four > .row > div {
+  &:nth-child(even) {
+    border-right: 1px solid #4682b4;
+  }
+
+  &:nth-child(6n) {
+    border-right: 2px solid #4682b4;
+  }
+}
+
+.four-four > .row > div {
+  &:nth-child(even) {
+    border-right: 1px solid #4682b4;
+  }
+
+  &:nth-child(8n) {
+    border-right: 2px solid #4682b4;
+  }
+}
+
+.six-eight > .row > div {
+  &:nth-child(3n) {
+    border-right: 1px solid #4682b4;
+  }
+
+  &:nth-child(6n) {
+    border-right: 2px solid #4682b4;
+  }
+}
+
+.eighth-note > .row > div:nth-child(3n) {
+  border-right: 1px solid #4682b4;
+}
+
+.clearfix:after {
+  content: " ";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+.clearfix {display: inline-table;}
+
+#controller {
+  margin-bottom: 10px;
+
+  > div {
+    margin: 10px 5px;
+  }
+}
+
+#control-buttons {
+  width: auto;
+  float: left;
+}
+
+#time-signature-buttons {
+  width: 100px;
+  float: left;
+}
+
+.btn-w-80 {
+  width: 80px;
+}
+
+#tempo {
+  margin: 0 10px;
+  float: left;
+
+  > * {
+    margin: 0 5px;
+    float: left;
+  }
+
+  > .label {
+    width: 100px;
+  }
+  > .slider {
+    width: 200px;
+  }
+}
+
+#bars {
+  margin: 0 10px;
+  float: left;
+
+  > * {
+    margin: 0 5px;
+    float: left;
+  }
+
+  > .label {
+    width: 100px;
+  }
+  > .slider {
+    width: 200px;
+  }
+}
+
+#select-buttons {
+  float: left;
+
+  > button {
+    margin: 0 5px;
+  }
+}
+
 .keyboard {
   position: relative;
 
@@ -9,30 +126,34 @@
 
   &.oneOctave {
     > .C.top {
-      height: 21px !important;
+      height: 21px;
     }
 
   }
 
   &.toyPiano {
     > .C.top {
-      height: 21px !important;
+      height: 21px;
     } 
   }
 
   &.keyboard76 {
+    .G.top {
+      height: 24px;
+    }
+
     .Gb.top {
-      top: 32px;
+      top: 21px;
       left: 0px;
     }
 
     .Eb.top {
-      top: 96px;
+      top: 84px;
       left: 0px;
     }
 
     .Db.top {
-      top: 138px;
+      top: 126px;
       left: 0px;
     }
 
@@ -40,6 +161,19 @@
       height: 21px !important;
     }
   }
+}
+
+.row {
+  display: table-row;
+  height: 20px;
+  /* border-collapse: collapse; */
+}
+
+.row > div {
+  display: table-cell;
+  border: 1px solid #b0c4de;
+  min-width: 15px;
+  /* border-collapse: collapse; */
 }
 
 .Bb {
@@ -57,14 +191,10 @@
   left: 0px;
 }
 
-
-
 .Eb {
   top: 168px;
   left: 0px;
 }
-
-
 
 .Db {
   top: 210px;
@@ -78,18 +208,11 @@
   width: 100%;
   border-spacing: 0;
   border-collapse: collapse;
-}
+  border-bottom: 1px solid #4682b4;
 
-.row {
-  display: table-row;
-  height: 20px;
-  /* border-collapse: collapse; */
-}
-
-.row > div {
-  display: table-cell;
-  border: 1px solid #b0c4de;
-  /* border-collapse: collapse; */
+  > .F > div {
+    border-bottom: 1px solid #4682b4;
+  }
 }
 
 .w-key {

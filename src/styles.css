@@ -17,17 +17,20 @@ h2 {
   margin-top: 0;
 }
 
-#piano-roll {
+#container {
   border: 1px solid silver;
   background-color: white;
 }
 
-#piano-roll * {
+#container * {
   box-sizing: border-box;
 }
 
+#piano-roll {
+  clear: left;
+}
+
 .octave, .top-note {
-  /*height: 252px;*/
   display: flex;
 }
 
