@@ -1,19 +1,23 @@
 const beatOptions = [
   {
     key: 'two-four',
-    value: '2/4'
+    value: '2/4',
+    numberOfNotesInBar: 4
   },
   {
     key: 'three-four',
-    value: '3/4'
+    value: '3/4',
+    numberOfNotesInBar: 6
   },
   {
     key: 'four-four',
-    value: '4/4'
+    value: '4/4',
+    numberOfNotesInBar: 8
   },
   {
     key: 'six-eight',
-    value: '6/8'
+    value: '6/8',
+    numberOfNotesInBar: 6
   }
 ];
 

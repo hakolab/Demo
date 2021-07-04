@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as Tone from "tone";
 import { Slider } from "@material-ui/core";
 import Button from '@material-ui/core/Button';
@@ -17,29 +17,63 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 
 export default function Pianoroll() {
-  const [noteCount, setNoteCount] = useState(32);
-  const [tones, setTones] = useState(AppData.keyboard76);
-  const [notes, setNotes] = useState(
-    tones.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false)))
-  );
-  //console.log(notes)
-  const [isPlaying, setIsPlaying] = useState(Tone.Transport.state);
-  //console.log(`state is ${isPlaying}`);
-  const [currentStep, setCurrentStep] = useState();
-  const steps = new Array(noteCount).fill(null).map((_, i) => i);
-  const [bpm, setBpm] = useState(Tone.Transport.bpm.value);
-  const [isChanging, setIsChanging] = useState(false);
-  const [bars, setBars] = useState(4);
+  /** state 小節数 */
+  const [numberOfBars, setNumberOfBars] = useState(4);
+  /** state 拍子インデックス */
+  const [beatIndex, setBeatIndex] = useState(2);
+  /** state 総音符数 */
+  const [noteCount, setNoteCount] = useState(() => getNumberOfNotesInBar());
 
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef(null);
-  const [selectedIndex, setSelectedIndex] = React.useState(1);
+  function getNumberOfNotesInBar(){
+    const noteCount = AppData.beatOptions[beatIndex].numberOfNotesInBar * numberOfBars
+    return noteCount;
+  }
+  /** state 鍵盤タイプ */
+  const [keyboardType, setKeyboardType] = useState(AppData.keyboard76);
+  /** state 音符 */
+  const [notes, setNotes] = useState(
+    keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false)))
+  );
+  /** state トランスポートの状態 started/stopped */
+  const [transportState, setTransportState] = useState(Tone.Transport.state);
+  /** state シーケンサーの現在値 */
+  const [currentStep, setCurrentStep] = useState();
+  /** シーケンサー配列 */
+  const steps = new Array(noteCount).fill(null).map((_, i) => i);
+  /** BPM */
+  const [bpm, setBpm] = useState(Tone.Transport.bpm.value);
+  /** スライダー操作中フラグ */
+  const [isChanging, setIsChanging] = useState(false);
+
+  /** プルダウンボタン開閉フラグ */
+  const [open, setOpen] = useState(false);
+  /** プルダウンボタン用Ref */
+  const anchorRef = useRef(null);
+
+  /**
+   * 総音符数更新
+   * -----
+   * 小節数、拍子が変更されたら総音符数を更新
+   */
+  useEffect(() => {
+    setNoteCount(getNumberOfNotesInBar())
+  },[numberOfBars, beatIndex])
+
+  /**
+   * 音符更新
+   * -----
+   * 総音符数、鍵盤タイプが変更されたら音符を更新
+   */
+  useEffect(() => {
+    setNotes(keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false))))
+  },[noteCount])
+  
 
   function handleMouseDown(event, octave, row, col) {
     // 要素をドラッグしようとするのを防ぐ
     event.preventDefault();
 
-    console.log(`mouse down on ${row}:${col} of ${octave}`);
+    //console.log(`mouse down on ${row}:${col} of ${octave}`);
 
     const newNotes = notes.slice();
     const current = newNotes[octave][row][col];
@@ -80,7 +114,7 @@ export default function Pianoroll() {
       setCurrentStep(step);
     }, steps).start(0);
     Tone.Transport.start();
-    setIsPlaying(Tone.Transport.state);
+    setTransportState(Tone.Transport.state);
 
     function dispose() {
       console.log('dispose')
@@ -94,7 +128,7 @@ export default function Pianoroll() {
   function stop() {
     Tone.Transport.stop();
     setCurrentStep(null);
-    setIsPlaying(Tone.Transport.state);
+    setTransportState(Tone.Transport.state);
   }
 
   function getPlayNotes(step) {
@@ -102,7 +136,7 @@ export default function Pianoroll() {
     notes.forEach((octave, octaveIndex) => {
       octave.forEach((tone, toneIndex) => {
         if(tone[step]){
-          playNotes.push(`${tones.data[octaveIndex].tones[toneIndex].pitchName}${tones.data[octaveIndex].octave}`);
+          playNotes.push(`${keyboardType.data[octaveIndex].tones[toneIndex].pitchName}${keyboardType.data[octaveIndex].octave}`);
         }
       })
     });
@@ -115,13 +149,13 @@ export default function Pianoroll() {
   }
 
   function handleChangeBars(event, newValue) {
-    setBars(newValue);
+    setNumberOfBars(newValue);
   }
 
   function reset() {
     stop();
     setNotes(
-      tones.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false)))
+      keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false)))
     );
     setBpm(120);
 
@@ -133,7 +167,7 @@ export default function Pianoroll() {
   }; */
 
   const handleMenuItemClick = (event, index) => {
-    setSelectedIndex(index);
+    setBeatIndex(index);
     setOpen(false);
   };
 
@@ -155,21 +189,21 @@ export default function Pianoroll() {
       <div id="controller" className="clearfix">
         <div id="select-buttons">
           <ButtonGroup color="primary" aria-label="outlined primary button group">
-            <Button onClick={() => setTones(AppData.oneOctave)}>one octave</Button>
-            <Button onClick={() => setTones(AppData.toyPiano)}>toy piano</Button>
-            <Button onClick={() => setTones(AppData.keyboard76)}>keyboard 76</Button>
+            <Button onClick={() => setKeyboardType(AppData.oneOctave)}>one octave</Button>
+            <Button onClick={() => setKeyboardType(AppData.toyPiano)}>toy piano</Button>
+            <Button onClick={() => setKeyboardType(AppData.keyboard76)}>keyboard 76</Button>
           </ButtonGroup>
         </div>
         <div id="control-buttons">
           <ButtonGroup color="primary" aria-label="outlined primary button group">
             {
-              isPlaying === "stopped"
+              transportState === "stopped"
               && <Button type="button" onClick={start} className="btn-w-80">
                   start
                 </Button>
             }
             {
-              isPlaying === "started"
+              transportState === "started"
               && <Button id="stop" type="button" onClick={stop} className="btn-w-80">
                   stop
                 </Button>
@@ -181,7 +215,7 @@ export default function Pianoroll() {
         </div>
         <div id="time-signature-buttons">
           <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button" variant="outlined" disableRipple>
-            <Button>{AppData.beatOptions[selectedIndex].value}</Button>
+            <Button>{AppData.beatOptions[beatIndex].value}</Button>
             <Button
               color="primary"
               size="small"
@@ -209,7 +243,7 @@ export default function Pianoroll() {
                         <MenuItem
                           key={option.key}
                           //disabled={index === 2}
-                          selected={index === selectedIndex}
+                          selected={index === beatIndex}
                           onClick={(event) => handleMenuItemClick(event, index)}
                         >
                           {option.value}
@@ -225,7 +259,7 @@ export default function Pianoroll() {
         <div id="bars">
           <div className="slider">
             <Slider
-              value={bars}
+              value={numberOfBars}
               onChange={handleChangeBars}
               min={2}
               max={16}
@@ -233,7 +267,7 @@ export default function Pianoroll() {
               onChangeCommitted={() => setIsChanging(false)}
             />
           </div>
-          <span>{bars} bars</span>
+          <span>{numberOfBars} bars</span>
         </div>
         <div id="tempo">
           {/* <div className="label">BPM: {bpm}</div> */}
@@ -254,10 +288,10 @@ export default function Pianoroll() {
       </div>
       <div id="piano-roll">
       {
-        tones.data.map((octaveObj, octaveIndex) => {
+        keyboardType.data.map((octaveObj, octaveIndex) => {
           return (
             <div className="octave">
-              <div className={`keyboard ${tones.mode}`}>
+              <div className={`keyboard ${keyboardType.mode}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
                     let rowClassName = octaveObj.bKeyIndex.indexOf(toneIndex) >= 0 ? "black-key" : "white-key";
@@ -266,7 +300,7 @@ export default function Pianoroll() {
                       rowClassName += ' top'
                     }
                     // 最低音域の場合は、 .bottom を設定
-                    if((tones.data.length - 1) === octaveIndex){
+                    if((keyboardType.data.length - 1) === octaveIndex){
                       rowClassName += ' bottom'
                     }
                     return (
@@ -275,7 +309,7 @@ export default function Pianoroll() {
                   })
                 }
               </div>
-              <div className={`grid ${AppData.beatOptions[selectedIndex].key}`}>
+              <div className={`grid ${AppData.beatOptions[beatIndex].key}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
                     let rowClassName =octaveObj.bKeyIndex.indexOf(toneIndex) >= 0 ? "b-key" : "w-key";
