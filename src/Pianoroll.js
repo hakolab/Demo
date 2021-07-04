@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useReducer, useRef } from "react";
 import * as Tone from "tone";
 import { Slider } from "@material-ui/core";
 import Button from '@material-ui/core/Button';
@@ -16,30 +16,86 @@ import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 
+/*
+
+clear, all clear ボタンを実装
+RESETボタン押したとき、notes をリセット
+2回目のリセットが効かない
+
+TODO
+鍵盤タイプを更新したら対応する音のアクティベーションを保持できたらいいな
+
+overflow設定
+
+ */
+
+
+const initialState = {
+  numberOfBars: 4,
+  beatIndex: 2,
+  noteCount: 32,
+  keyboardType: AppData.keyboard76,
+  notes: AppData.keyboard76.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(32).fill(false)))
+}
+
+function reducer(state, action){
+  switch(action.type){
+    case "changeNumberOfBars": {
+      const newNoteCount = AppData.beatOptions[state.beatIndex].numberOfNotesInBar * action.payload
+      const newNotes = state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false)))
+      return {...state, numberOfBars: action.payload, noteCount: newNoteCount, notes: newNotes}
+    }
+    case "changeBeat": {
+      const newNoteCount = AppData.beatOptions[action.payload].numberOfNotesInBar * state.numberOfBars
+      const newNotes = state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false)))
+      return {...state, beatIndex: action.payload, noteCount: newNoteCount, notes: newNotes}
+    }
+    case "changeKeyboard": {
+      const newNotes = action.payload.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false)))
+      return {...state, keyboardType: action.payload, notes: newNotes}
+    }
+    case "toggleActivationOfNote": {
+      console.log(action)
+      const newNotes = state.notes.slice();
+      const current = newNotes[action.payload.octave][action.payload.row][action.payload.col];
+      newNotes[action.payload.octave][action.payload.row][action.payload.col] = !current;
+      return {...state}
+    }
+    case "reset": {
+      return {...initialState}
+    }
+    default:
+
+  }
+}
+
 export default function Pianoroll() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
   /** state 小節数 */
-  const [numberOfBars, setNumberOfBars] = useState(4);
+  //const [numberOfBars, setNumberOfBars] = useState(4);
   /** state 拍子インデックス */
-  const [beatIndex, setBeatIndex] = useState(2);
+  //const [beatIndex, setBeatIndex] = useState(2);
   /** state 総音符数 */
-  const [noteCount, setNoteCount] = useState(() => getNumberOfNotesInBar());
+  //const [noteCount, setNoteCount] = useState(() => getNumberOfNotesInBar());
 
   function getNumberOfNotesInBar(){
-    const noteCount = AppData.beatOptions[beatIndex].numberOfNotesInBar * numberOfBars
+    const noteCount = AppData.beatOptions[state.beatIndex].numberOfNotesInBar * state.numberOfBars
     return noteCount;
   }
+
   /** state 鍵盤タイプ */
-  const [keyboardType, setKeyboardType] = useState(AppData.keyboard76);
+  //const [keyboardType, setKeyboardType] = useState(AppData.keyboard76);
   /** state 音符 */
-  const [notes, setNotes] = useState(
-    keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false)))
-  );
+  /* const [notes, setNotes] = useState(
+    state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false)))
+  ); */
   /** state トランスポートの状態 started/stopped */
   const [transportState, setTransportState] = useState(Tone.Transport.state);
   /** state シーケンサーの現在値 */
   const [currentStep, setCurrentStep] = useState();
   /** シーケンサー配列 */
-  const steps = new Array(noteCount).fill(null).map((_, i) => i);
+  const steps = new Array(state.noteCount).fill(null).map((_, i) => i);
   /** BPM */
   const [bpm, setBpm] = useState(Tone.Transport.bpm.value);
   /** スライダー操作中フラグ */
@@ -55,33 +111,33 @@ export default function Pianoroll() {
    * -----
    * 小節数、拍子が変更されたら総音符数を更新
    */
-  useEffect(() => {
+  /* useEffect(() => {
     setNoteCount(getNumberOfNotesInBar())
-  },[numberOfBars, beatIndex])
+  },[state.numberOfBars, beatIndex]) */
 
   /**
    * 音符更新
    * -----
    * 総音符数、鍵盤タイプが変更されたら音符を更新
    */
-  useEffect(() => {
+  /* useEffect(() => {
     setNotes(keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false))))
-  },[noteCount])
+  },[noteCount]) */
   
 
   function handleMouseDown(event, octave, row, col) {
     // 要素をドラッグしようとするのを防ぐ
     event.preventDefault();
-
+    dispatch({type: "toggleActivationOfNote", payload: {octave, row, col}})
     //console.log(`mouse down on ${row}:${col} of ${octave}`);
 
-    const newNotes = notes.slice();
+    /* const newNotes = state.notes.slice();
     const current = newNotes[octave][row][col];
     newNotes[octave][row][col] = !current;
-    setNotes(newNotes);
+    setNotes(newNotes); */
   }
 
-  function handleMouseEnter(event, octaveIndex, toneIndex, noteIndex) {
+  function handleMouseEnter(event, octave, row, col) {
     //console.log(`mouse enter on ${row}:${col}`);
     // 左クリックされていなければ return
     if (event.buttons !== 1) {
@@ -94,17 +150,12 @@ export default function Pianoroll() {
     }
 
     event.preventDefault();
-    const newNotes = notes.slice();
+    dispatch({type: "toggleActivationOfNote", payload: {octave, row, col}})
+    /* const newNotes = state.notes.slice();
     const current = newNotes[octaveIndex][toneIndex][noteIndex];
     newNotes[octaveIndex][toneIndex][noteIndex] = !current;
-    setNotes(newNotes);
+    setNotes(newNotes); */
   }
-
-  useEffect(() => {
-    if(Tone.Transport.state === "stopped"){
-
-    }
-  },[Tone.Transport.state])
 
   function start() {
     const synth = new Tone.PolySynth().toDestination()
@@ -133,10 +184,10 @@ export default function Pianoroll() {
 
   function getPlayNotes(step) {
     let playNotes = [];
-    notes.forEach((octave, octaveIndex) => {
+    state.notes.forEach((octave, octaveIndex) => {
       octave.forEach((tone, toneIndex) => {
         if(tone[step]){
-          playNotes.push(`${keyboardType.data[octaveIndex].tones[toneIndex].pitchName}${keyboardType.data[octaveIndex].octave}`);
+          playNotes.push(`${state.keyboardType.data[octaveIndex].tones[toneIndex].pitchName}${state.keyboardType.data[octaveIndex].octave}`);
         }
       })
     });
@@ -149,17 +200,19 @@ export default function Pianoroll() {
   }
 
   function handleChangeBars(event, newValue) {
-    setNumberOfBars(newValue);
+    //setNumberOfBars(newValue);
+    dispatch({type: "changeNumberOfBars", payload: newValue})
   }
 
   function reset() {
     stop();
-    setNotes(
-      keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(noteCount).fill(false)))
-    );
+    /* setNotes(
+      state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false)))
+    ); */
     setBpm(120);
-
     Tone.Transport.bpm.value = 120;
+
+    dispatch({type: "reset"})
   }
 
   /* const handleClick = () => {
@@ -167,8 +220,9 @@ export default function Pianoroll() {
   }; */
 
   const handleMenuItemClick = (event, index) => {
-    setBeatIndex(index);
+    //setBeatIndex(index);
     setOpen(false);
+    dispatch({type: "changeBeat", payload: index})
   };
 
   const handleToggle = () => {
@@ -189,9 +243,18 @@ export default function Pianoroll() {
       <div id="controller" className="clearfix">
         <div id="select-buttons">
           <ButtonGroup color="primary" aria-label="outlined primary button group">
-            <Button onClick={() => setKeyboardType(AppData.oneOctave)}>one octave</Button>
-            <Button onClick={() => setKeyboardType(AppData.toyPiano)}>toy piano</Button>
-            <Button onClick={() => setKeyboardType(AppData.keyboard76)}>keyboard 76</Button>
+            <Button onClick={() => {
+              //setKeyboardType(AppData.oneOctave)
+              dispatch({type: "changeKeyboard", payload: AppData.oneOctave})
+              }} disabled={transportState === "started"}>one octave</Button>
+            <Button onClick={() => {
+              //setKeyboardType(AppData.toyPiano)
+              dispatch({type: "changeKeyboard", payload: AppData.toyPiano})
+              }} disabled={transportState === "started"}>toy piano</Button>
+            <Button onClick={() => {
+              //setKeyboardType(AppData.keyboard76)
+              dispatch({type: "changeKeyboard", payload: AppData.keyboard76})
+              }} disabled={transportState === "started"}>keyboard 76</Button>
           </ButtonGroup>
         </div>
         <div id="control-buttons">
@@ -208,14 +271,14 @@ export default function Pianoroll() {
                   stop
                 </Button>
             }        
-            <Button id="reset" type="button" onClick={reset} className="btn-w-80">
+            <Button id="reset" type="button" onClick={reset} className="btn-w-80"  disabled={transportState === "started"}>
               reset
             </Button>
           </ButtonGroup>
         </div>
         <div id="time-signature-buttons">
-          <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button" variant="outlined" disableRipple>
-            <Button>{AppData.beatOptions[beatIndex].value}</Button>
+          <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button" variant="outlined" disableRipple  disabled={transportState === "started"}>
+            <Button>{AppData.beatOptions[state.beatIndex].value}</Button>
             <Button
               color="primary"
               size="small"
@@ -243,7 +306,7 @@ export default function Pianoroll() {
                         <MenuItem
                           key={option.key}
                           //disabled={index === 2}
-                          selected={index === beatIndex}
+                          selected={index === state.beatIndex}
                           onClick={(event) => handleMenuItemClick(event, index)}
                         >
                           {option.value}
@@ -259,15 +322,16 @@ export default function Pianoroll() {
         <div id="bars">
           <div className="slider">
             <Slider
-              value={numberOfBars}
+              value={state.numberOfBars}
               onChange={handleChangeBars}
               min={2}
               max={16}
               onMouseDown={() => setIsChanging(true)}
               onChangeCommitted={() => setIsChanging(false)}
+              disabled={transportState === "started"}
             />
           </div>
-          <span>{numberOfBars} bars</span>
+          <span>{state.numberOfBars} bars</span>
         </div>
         <div id="tempo">
           {/* <div className="label">BPM: {bpm}</div> */}
@@ -288,10 +352,10 @@ export default function Pianoroll() {
       </div>
       <div id="piano-roll">
       {
-        keyboardType.data.map((octaveObj, octaveIndex) => {
+        state.keyboardType.data.map((octaveObj, octaveIndex) => {
           return (
             <div className="octave">
-              <div className={`keyboard ${keyboardType.mode}`}>
+              <div className={`keyboard ${state.keyboardType.mode}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
                     let rowClassName = octaveObj.bKeyIndex.indexOf(toneIndex) >= 0 ? "black-key" : "white-key";
@@ -300,7 +364,7 @@ export default function Pianoroll() {
                       rowClassName += ' top'
                     }
                     // 最低音域の場合は、 .bottom を設定
-                    if((keyboardType.data.length - 1) === octaveIndex){
+                    if((state.keyboardType.data.length - 1) === octaveIndex){
                       rowClassName += ' bottom'
                     }
                     return (
@@ -309,14 +373,14 @@ export default function Pianoroll() {
                   })
                 }
               </div>
-              <div className={`grid ${AppData.beatOptions[beatIndex].key}`}>
+              <div className={`grid ${AppData.beatOptions[state.beatIndex].key}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
                     let rowClassName =octaveObj.bKeyIndex.indexOf(toneIndex) >= 0 ? "b-key" : "w-key";
                     return (
                       <div className={`row ${rowClassName} ${tone.pitchName}`}>
                         {
-                          notes[octaveIndex][toneIndex].map((note, noteIndex) => {
+                          state.notes[octaveIndex][toneIndex].map((note, noteIndex) => {
                             // 選択されているか
                             let cellClassName = note ? "active" : "";
                             // シーケンサーがいまのステップか
