@@ -52,7 +52,13 @@
 .clearfix {display: inline-table;}
 
 #controller {
+  position: sticky;
+  top: 0;
+  width:100%;
   margin-bottom: 10px;
+  background-color: white;
+  z-index: 100;
+  border-bottom: #4682b4;
 
   > div {
     margin: 10px 5px;
@@ -71,6 +77,14 @@
 
 .btn-w-80 {
   width: 80px;
+}
+
+.btn-w-120 {
+  width: 120px;
+}
+
+.btn-w-130 {
+  width: 130px;
 }
 
 #tempo {
