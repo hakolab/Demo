@@ -1,7 +1,7 @@
 import React from 'react'
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
-import { useButtonStyles } from './useButtonStyles'
+import { useButtonStyles } from '../hooks/useButtonStyles'
 import { useMediaQueryDown } from '../hooks/useMediaQuery';
 
 export default function SelectButton({data, onClick, action, disabled}){

@@ -3,7 +3,7 @@ import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faStop, faEraser, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import { useButtonStyles } from './useButtonStyles';
+import { useButtonStyles } from '../hooks/useButtonStyles';
 
 export default function ControlButton({start, stop, clear, allClear, isPlaying}){
   const classes = useButtonStyles();
