@@ -1,64 +1,50 @@
 import React, { useState, useReducer, useRef } from "react";
 import * as Tone from "tone";
-import { Grid, Box, Slider } from "@material-ui/core";
-import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import ViewColumnIcon from '@material-ui/icons/ViewColumn';
-import AddIcon from '@material-ui/icons/Add';
+import { Grid, Box, Slider, useTheme } from "@material-ui/core";
 import DirectionsWalkIcon from '@material-ui/icons/DirectionsWalk';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
+import DragHandleIcon from '@material-ui/icons/DragHandle';
+import ReorderIcon from '@material-ui/icons/Reorder';
 import * as AppData from "./AppData";
 import './styles.css'
 import './styles.scss'
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
-import ClickAwayListener from '@material-ui/core/ClickAwayListener';
-import Grow from '@material-ui/core/Grow';
-import Paper from '@material-ui/core/Paper';
-import Popper from '@material-ui/core/Popper';
-import MenuItem from '@material-ui/core/MenuItem';
-import MenuList from '@material-ui/core/MenuList';
 import { copy, copyArray, deepCopy, clone } from './recursiveCopy'
-
-/*
-
-controllerを
-Grid レイアウトに変更
-overflow設定
-
- */
-
+import SelectButton from "./components/SelectButton";
+import ControlButton from "./components/ControlButton";
+import ControlSlider from "./components/ControlSlider";
 
 const initialState = {
   numberOfBars: 4,
-  beatIndex: 2,
+  beat: clone(AppData.fourFour),
   noteCount: 32,
-  keyboardType: clone(AppData.toyPiano),
-  notes: AppData.toyPiano.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(32).fill(false)))
+  keyboard: clone(AppData.oneOctave),
+  notes: AppData.oneOctave.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(32).fill(false)))
 }
 
 function reducer(state, action){
   switch(action.type){
     case "changeNumberOfBars": {
-      const newNoteCount = AppData.beatOptions[state.beatIndex].numberOfNotesInBar * action.payload
-      const newNotes = copyArray(state.notes, state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false))))
+      const newNoteCount = state.beat.numberOfNotesInBar * action.payload
+      const newNotes = copyArray(state.notes, state.keyboard.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false))))
       return {...state, numberOfBars: action.payload, noteCount: newNoteCount, notes: newNotes}
     }
     case "changeBeat": {
-      const newNoteCount = AppData.beatOptions[action.payload].numberOfNotesInBar * state.numberOfBars
-      const newNotes = copyArray(state.notes, state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false))))
-      return {...state, beatIndex: action.payload, noteCount: newNoteCount, notes: newNotes}
+      const newBeat = AppData.getBeat(action.payload)
+      const newNoteCount = newBeat.numberOfNotesInBar * state.numberOfBars
+      const newNotes = copyArray(state.notes, state.keyboard.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false))))
+      return {...state, beat: newBeat, noteCount: newNoteCount, notes: newNotes}
     }
     case "changeKeyboard": {
-      console.log("state")
-      console.log(state)
+      const newKeyboard = AppData.getKeyboard(action.payload);
       const toNotes = copy(
         state.notes,
-        action.payload.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false))),
-        state.keyboardType.data,
-        action.payload.data)
+        newKeyboard.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false))),
+        state.keyboard.data,
+        newKeyboard.data)
 
-      return {...state,
-        keyboardType: action.payload,
+      return {
+        ...state,
+        keyboard: newKeyboard,
         notes: toNotes
       }
     }
@@ -69,16 +55,10 @@ function reducer(state, action){
       return {...state}
     }
     case "clearConfig": {
-      return {
-        ...state,
-        numberOfBars: 4,
-        beatIndex: 2,
-        noteCount: 32,
-        keyboardType: AppData.oneOctave
-      }
+      return {...initialState}
     }
     case "clearNotes": {
-      return {...state, notes: state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false)))}
+      return {...state, notes: state.keyboard.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false)))}
     }
     default:
 
@@ -98,11 +78,6 @@ export default function Pianoroll() {
   const [bpm, setBpm] = useState(Tone.Transport.bpm.value);
   /** スライダー操作中フラグ */
   const [isChanging, setIsChanging] = useState(false);
-
-  /** プルダウンボタン開閉フラグ */
-  const [open, setOpen] = useState(false);
-  /** プルダウンボタン用Ref */
-  const anchorRef = useRef(null);
 
   function handleMouseDown(event, octave, row, col) {
     // 要素をドラッグしようとするのを防ぐ
@@ -155,7 +130,7 @@ export default function Pianoroll() {
     state.notes.forEach((octave, octaveIndex) => {
       octave.forEach((tone, toneIndex) => {
         if(tone[step]){
-          playNotes.push(`${state.keyboardType.data[octaveIndex].tones[toneIndex].pitchName}${state.keyboardType.data[octaveIndex].octave}`);
+          playNotes.push(`${state.keyboard.data[octaveIndex].tones[toneIndex].pitchName}${state.keyboard.data[octaveIndex].octave}`);
         }
       })
     });
@@ -183,159 +158,94 @@ export default function Pianoroll() {
     Tone.Transport.bpm.value = 120;
   }
 
-  /** time signature */
-  const handleMenuItemClick = (event, index) => {
-    setOpen(false);
-    dispatch({type: "changeBeat", payload: index})
-  };
-
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleClose = (event) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
-    }
-
-    setOpen(false);
-  };
-  /** time signature end */
-
   return (
     <div id="container">
       <Grid id="controller" container spacing={1}>
         <Grid container item xs={12}>
           <Box m={1}>
-            <ButtonGroup color="primary" aria-label="outlined primary button group">
-              <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.oneOctave})} className="btn-w-130" disabled={transportState === "started"}>one octave</Button>
-              <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.toyPiano})} className="btn-w-130" disabled={transportState === "started"}>toy piano</Button>
-              <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.keyboard76})} className="btn-w-130" disabled={transportState === "started"}>keyboard 76</Button>
-            </ButtonGroup>
+            <SelectButton
+              data={AppData.getKeyboardsName()}
+              onClick={dispatch}
+              action="changeKeyboard"
+              disabled={transportState === "started"}
+              />
           </Box>  
           <Box m={1}>
-            <ButtonGroup color="primary" aria-label="outlined primary button group">
-              {
-                transportState === "stopped"
-                && <Button type="button" onClick={start} className="btn-w-120">
-                    start
-                  </Button>
-              }
-              {
-                transportState === "started"
-                && <Button id="stop" type="button" onClick={stop} className="btn-w-120">
-                    stop
-                  </Button>
-              }        
-              <Button id="clear" type="button" onClick={clearNotes} className="btn-w-120"  disabled={transportState === "started"}>
-                clear
-              </Button>
-              <Button id="clear-all" type="button" onClick={clearAll} className="btn-w-120"  disabled={transportState === "started"}>
-                all clear
-              </Button>
-            </ButtonGroup>
+            <SelectButton
+              data={AppData.getBeatsName()}
+              onClick={dispatch}
+              action="changeBeat"
+              disabled={transportState === "started"}
+              size="small"
+              />
           </Box>
           <Box m={1}>
-            <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button" variant="outlined" disableRipple  disabled={transportState === "started"}>
-              <Button>{AppData.beatOptions[state.beatIndex].value}</Button>
-              <Button
-                color="primary"
-                size="small"
-                aria-controls={open ? 'split-button-menu' : undefined}
-                aria-expanded={open ? 'true' : undefined}
-                aria-label="select merge strategy"
-                aria-haspopup="menu"
-                onClick={handleToggle}
-              >
-                <ArrowDropDownIcon />
-              </Button>
-            </ButtonGroup>
-            <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
-              {({ TransitionProps, placement }) => (
-                <Grow
-                  {...TransitionProps}
-                  style={{
-                    transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
-                  }}
-                >
-                  <Paper>
-                    <ClickAwayListener onClickAway={handleClose}>
-                      <MenuList id="split-button-menu">
-                        {AppData.beatOptions.map((option, index) => (
-                          <MenuItem
-                            key={option.key}
-                            selected={index === state.beatIndex}
-                            onClick={(event) => handleMenuItemClick(event, index)}
-                          >
-                            {option.value}
-                          </MenuItem>
-                        ))}
-                      </MenuList>
-                    </ClickAwayListener>
-                  </Paper>
-                </Grow>
-              )}
-            </Popper>
+            <ControlButton
+              start={start}
+              stop={stop}
+              clear={clearNotes}
+              allClear={clearAll}
+              isPlaying={transportState === "started"}
+              />
           </Box>
         </Grid>
         <Grid container spacing={2}item xs={12}>
-          <Grid item xs={12} sm={6}/*  sm={12} md={6} */>
-            <Box>
-              <Grid container spacing={1}>
-                <Grid item>
-                  <ViewColumnIcon />
-                  {/* <RemoveIcon /> */}
-                </Grid>
-                <Grid item xs>
+          <Grid item xs={12} sm={6}>
+            <ControlSlider
+              value={state.numberOfBars}
+              onChange={handleChangeBars}
+              min={2}
+              max={16}
+              onMouseDown={() => setIsChanging(true)}
+              onChangeCommitted={() => setIsChanging(false)}
+              disabled={transportState === "started"}
+              iconRotate={true}
+              IconLeft={DragHandleIcon}
+              IconRight={ReorderIcon}
+              />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <ControlSlider
+                value={bpm}
+                onChange={handleChange}
+                min={40}
+                max={200}
+                onMouseDown={() => setIsChanging(true)}
+                onChangeCommitted={() => setIsChanging(false)}
+                disabled={false}
+                valueLabelDisplay="auto"
+                iconRotate={false}
+                IconLeft={DirectionsWalkIcon}
+                IconRight={DirectionsRunIcon}
+                />
+{/*             <Grid container spacing={1}>
+              <Grid item>
+                <DirectionsWalkIcon/>
+              </Grid>
+              <Grid item xs>
                   <Slider
-                    value={state.numberOfBars}
-                    onChange={handleChangeBars}
-                    min={2}
-                    max={16}
+                    value={bpm}
+                    onChange={handleChange}
+                    min={40}
+                    max={200}
                     onMouseDown={() => setIsChanging(true)}
                     onChangeCommitted={() => setIsChanging(false)}
-                    disabled={transportState === "started"}
-                    valueLabelDisplay="auto"
+                    disabled={false}
                   />
-                </Grid>
-                <Grid item>
-                  <AddIcon />
-                  {/* <span>{state.numberOfBars} bars</span> */}
-                </Grid>
               </Grid>
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={6} /*  md={6} */>
-            <Box>
-              <Grid container spacing={1}>
-                <Grid item>
-                  <DirectionsWalkIcon/>
-                </Grid>
-                <Grid item xs>
-                    <Slider
-                      value={bpm}
-                      onChange={handleChange}
-                      min={40}
-                      max={200}
-                      onMouseDown={() => setIsChanging(true)}
-                      onChangeCommitted={() => setIsChanging(false)}
-                      valueLabelDisplay="auto"
-                    />
-                </Grid>
-                <Grid item>
-                  <DirectionsRunIcon />
-                </Grid>
+              <Grid item>
+                <DirectionsRunIcon />
               </Grid>
-            </Box>
+            </Grid> */}
           </Grid>
         </Grid>
       </Grid>
       <div id="piano-roll">
       {
-        state.keyboardType.data.map((octaveObj, octaveIndex) => {
+        state.keyboard.data.map((octaveObj, octaveIndex) => {
           return (
             <div className="octave">
-              <div className={`keyboard ${state.keyboardType.mode}`}>
+              <div className={`keyboard ${state.keyboard.mode}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
                     let rowClassName = octaveObj.bKeyIndex.indexOf(toneIndex) >= 0 ? "black-key" : "white-key";
@@ -344,7 +254,7 @@ export default function Pianoroll() {
                       rowClassName += ' top'
                     }
                     // 最低音域の場合は、 .bottom を設定
-                    if((state.keyboardType.data.length - 1) === octaveIndex){
+                    if((state.keyboard.data.length - 1) === octaveIndex){
                       rowClassName += ' bottom'
                     }
                     return (
@@ -353,7 +263,7 @@ export default function Pianoroll() {
                   })
                 }
               </div>
-              <div className={`grid ${AppData.beatOptions[state.beatIndex].key}`}>
+              <div className={`grid ${state.beat.mode}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
                     let rowClassName =octaveObj.bKeyIndex.indexOf(toneIndex) >= 0 ? "b-key" : "w-key";
