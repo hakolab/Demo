@@ -1,13 +1,10 @@
-import React, { useState, useEffect, useReducer, useRef } from "react";
+import React, { useState, useReducer, useRef } from "react";
 import * as Tone from "tone";
 import { Grid, Box, Slider } from "@material-ui/core";
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ViewColumnIcon from '@material-ui/icons/ViewColumn';
-import PlusOneIcon from '@material-ui/icons/PlusOne';
 import AddIcon from '@material-ui/icons/Add';
-import ExposureNeg1Icon from '@material-ui/icons/ExposureNeg1';
-import RemoveIcon from '@material-ui/icons/Remove';
 import DirectionsWalkIcon from '@material-ui/icons/DirectionsWalk';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
 import * as AppData from "./AppData";
@@ -20,7 +17,7 @@ import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
-import { copy, find, copyArray, deepCopy, clone } from './recursiveCopy'
+import { copy, copyArray, deepCopy, clone } from './recursiveCopy'
 
 /*
 
@@ -204,11 +201,6 @@ export default function Pianoroll() {
     setOpen(false);
   };
   /** time signature end */
-
-  function changeKeyboard(keyboardType){
-    //console.log(e)
-    
-  }
 
   return (
     <div id="container">
