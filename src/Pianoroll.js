@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useReducer, useRef } from "react";
 import * as Tone from "tone";
-import { Slider } from "@material-ui/core";
+import { Grid, Box, Slider } from "@material-ui/core";
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import ViewColumnIcon from '@material-ui/icons/ViewColumn';
+import PlusOneIcon from '@material-ui/icons/PlusOne';
+import AddIcon from '@material-ui/icons/Add';
+import ExposureNeg1Icon from '@material-ui/icons/ExposureNeg1';
+import RemoveIcon from '@material-ui/icons/Remove';
 import DirectionsWalkIcon from '@material-ui/icons/DirectionsWalk';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
 import * as AppData from "./AppData";
@@ -23,11 +28,6 @@ controllerを
 Grid レイアウトに変更
 overflow設定
 
-TODO
-鍵盤タイプを更新したら対応する音のアクティベーションは保持できたらいいな
-
-
-
  */
 
 
@@ -38,15 +38,6 @@ const initialState = {
   keyboardType: clone(AppData.toyPiano),
   notes: AppData.toyPiano.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(32).fill(false)))
 }
-
-/* function deepCopy(from) {
-  const result = [];
-  for (let item of from) {
-    const newItem = Array.isArray(item) ? item.slice() : item;
-    result.push(newItem);
-  }
-  return result;
-} */
 
 function reducer(state, action){
   switch(action.type){
@@ -120,11 +111,9 @@ export default function Pianoroll() {
     // 要素をドラッグしようとするのを防ぐ
     event.preventDefault();
     dispatch({type: "toggleActivationOfNote", payload: {octave, row, col}})
-    //console.log(`mouse down on ${row}:${col} of ${octave}`);
   }
 
   function handleMouseEnter(event, octave, row, col) {
-    //console.log(`mouse enter on ${row}:${col}`);
     // 左クリックされていなければ return
     if (event.buttons !== 1) {
       return;
@@ -223,108 +212,132 @@ export default function Pianoroll() {
 
   return (
     <div id="container">
-      <div id="controller" className="clearfix">
-        <div id="select-buttons">
-          <ButtonGroup color="primary" aria-label="outlined primary button group">
-            <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.oneOctave})} className="btn-w-130" disabled={transportState === "started"}>one octave</Button>
-            <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.toyPiano})} className="btn-w-130" disabled={transportState === "started"}>toy piano</Button>
-            <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.keyboard76})} className="btn-w-130" disabled={transportState === "started"}>keyboard 76</Button>
-          </ButtonGroup>
-        </div>
-        <div id="control-buttons">
-          <ButtonGroup color="primary" aria-label="outlined primary button group">
-            {
-              transportState === "stopped"
-              && <Button type="button" onClick={start} className="btn-w-120">
-                  start
-                </Button>
-            }
-            {
-              transportState === "started"
-              && <Button id="stop" type="button" onClick={stop} className="btn-w-120">
-                  stop
-                </Button>
-            }        
-            <Button id="clear" type="button" onClick={clearNotes} className="btn-w-120"  disabled={transportState === "started"}>
-              clear
-            </Button>
-            <Button id="clear-all" type="button" onClick={clearAll} className="btn-w-120"  disabled={transportState === "started"}>
-              all clear
-            </Button>
-          </ButtonGroup>
-        </div>
-        <div id="time-signature-buttons">
-          <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button" variant="outlined" disableRipple  disabled={transportState === "started"}>
-            <Button>{AppData.beatOptions[state.beatIndex].value}</Button>
-            <Button
-              color="primary"
-              size="small"
-              aria-controls={open ? 'split-button-menu' : undefined}
-              aria-expanded={open ? 'true' : undefined}
-              aria-label="select merge strategy"
-              aria-haspopup="menu"
-              onClick={handleToggle}
-            >
-              <ArrowDropDownIcon />
-            </Button>
-          </ButtonGroup>
-          <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
-            {({ TransitionProps, placement }) => (
-              <Grow
-                {...TransitionProps}
-                style={{
-                  transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
-                }}
+      <Grid id="controller" container spacing={1}>
+        <Grid container item xs={12}>
+          <Box m={1}>
+            <ButtonGroup color="primary" aria-label="outlined primary button group">
+              <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.oneOctave})} className="btn-w-130" disabled={transportState === "started"}>one octave</Button>
+              <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.toyPiano})} className="btn-w-130" disabled={transportState === "started"}>toy piano</Button>
+              <Button onClick={() => dispatch({type: "changeKeyboard", payload: AppData.keyboard76})} className="btn-w-130" disabled={transportState === "started"}>keyboard 76</Button>
+            </ButtonGroup>
+          </Box>  
+          <Box m={1}>
+            <ButtonGroup color="primary" aria-label="outlined primary button group">
+              {
+                transportState === "stopped"
+                && <Button type="button" onClick={start} className="btn-w-120">
+                    start
+                  </Button>
+              }
+              {
+                transportState === "started"
+                && <Button id="stop" type="button" onClick={stop} className="btn-w-120">
+                    stop
+                  </Button>
+              }        
+              <Button id="clear" type="button" onClick={clearNotes} className="btn-w-120"  disabled={transportState === "started"}>
+                clear
+              </Button>
+              <Button id="clear-all" type="button" onClick={clearAll} className="btn-w-120"  disabled={transportState === "started"}>
+                all clear
+              </Button>
+            </ButtonGroup>
+          </Box>
+          <Box m={1}>
+            <ButtonGroup variant="contained" color="primary" ref={anchorRef} aria-label="split button" variant="outlined" disableRipple  disabled={transportState === "started"}>
+              <Button>{AppData.beatOptions[state.beatIndex].value}</Button>
+              <Button
+                color="primary"
+                size="small"
+                aria-controls={open ? 'split-button-menu' : undefined}
+                aria-expanded={open ? 'true' : undefined}
+                aria-label="select merge strategy"
+                aria-haspopup="menu"
+                onClick={handleToggle}
               >
-                <Paper>
-                  <ClickAwayListener onClickAway={handleClose}>
-                    <MenuList id="split-button-menu">
-                      {AppData.beatOptions.map((option, index) => (
-                        <MenuItem
-                          key={option.key}
-                          selected={index === state.beatIndex}
-                          onClick={(event) => handleMenuItemClick(event, index)}
-                        >
-                          {option.value}
-                        </MenuItem>
-                      ))}
-                    </MenuList>
-                  </ClickAwayListener>
-                </Paper>
-              </Grow>
-            )}
-          </Popper>
-        </div>
-        <div id="bars">
-          <div className="slider">
-            <Slider
-              value={state.numberOfBars}
-              onChange={handleChangeBars}
-              min={2}
-              max={16}
-              onMouseDown={() => setIsChanging(true)}
-              onChangeCommitted={() => setIsChanging(false)}
-              disabled={transportState === "started"}
-            />
-          </div>
-          <span>{state.numberOfBars} bars</span>
-        </div>
-        <div id="tempo">
-          <DirectionsWalkIcon/>
-          <div className="slider">
-            <Slider
-              value={bpm}
-              onChange={handleChange}
-              min={40}
-              max={200}
-              onMouseDown={() => setIsChanging(true)}
-              onChangeCommitted={() => setIsChanging(false)}
-            />
-          </div>
-          <DirectionsRunIcon />
-          <span>{bpm}</span>
-        </div>
-      </div>
+                <ArrowDropDownIcon />
+              </Button>
+            </ButtonGroup>
+            <Popper open={open} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
+              {({ TransitionProps, placement }) => (
+                <Grow
+                  {...TransitionProps}
+                  style={{
+                    transformOrigin: placement === 'bottom' ? 'center top' : 'center bottom',
+                  }}
+                >
+                  <Paper>
+                    <ClickAwayListener onClickAway={handleClose}>
+                      <MenuList id="split-button-menu">
+                        {AppData.beatOptions.map((option, index) => (
+                          <MenuItem
+                            key={option.key}
+                            selected={index === state.beatIndex}
+                            onClick={(event) => handleMenuItemClick(event, index)}
+                          >
+                            {option.value}
+                          </MenuItem>
+                        ))}
+                      </MenuList>
+                    </ClickAwayListener>
+                  </Paper>
+                </Grow>
+              )}
+            </Popper>
+          </Box>
+        </Grid>
+        <Grid container spacing={2}item xs={12}>
+          <Grid item xs={12} sm={6}/*  sm={12} md={6} */>
+            <Box>
+              <Grid container spacing={1}>
+                <Grid item>
+                  <ViewColumnIcon />
+                  {/* <RemoveIcon /> */}
+                </Grid>
+                <Grid item xs>
+                  <Slider
+                    value={state.numberOfBars}
+                    onChange={handleChangeBars}
+                    min={2}
+                    max={16}
+                    onMouseDown={() => setIsChanging(true)}
+                    onChangeCommitted={() => setIsChanging(false)}
+                    disabled={transportState === "started"}
+                    valueLabelDisplay="auto"
+                  />
+                </Grid>
+                <Grid item>
+                  <AddIcon />
+                  {/* <span>{state.numberOfBars} bars</span> */}
+                </Grid>
+              </Grid>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6} /*  md={6} */>
+            <Box>
+              <Grid container spacing={1}>
+                <Grid item>
+                  <DirectionsWalkIcon/>
+                </Grid>
+                <Grid item xs>
+                    <Slider
+                      value={bpm}
+                      onChange={handleChange}
+                      min={40}
+                      max={200}
+                      onMouseDown={() => setIsChanging(true)}
+                      onChangeCommitted={() => setIsChanging(false)}
+                      valueLabelDisplay="auto"
+                    />
+                </Grid>
+                <Grid item>
+                  <DirectionsRunIcon />
+                </Grid>
+              </Grid>
+            </Box>
+          </Grid>
+        </Grid>
+      </Grid>
       <div id="piano-roll">
       {
         state.keyboardType.data.map((octaveObj, octaveIndex) => {

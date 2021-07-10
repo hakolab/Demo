@@ -42,15 +42,6 @@
   border-right: 1px solid #4682b4;
 }
 
-.clearfix:after {
-  content: " ";
-  display: block;
-  height: 0;
-  clear: both;
-  visibility: hidden;
-}
-.clearfix {display: inline-table;}
-
 #controller {
   position: sticky;
   top: 0;
@@ -59,20 +50,7 @@
   background-color: white;
   z-index: 100;
   border-bottom: #4682b4;
-
-  > div {
-    margin: 10px 5px;
-  }
-}
-
-#control-buttons {
-  width: auto;
-  float: left;
-}
-
-#time-signature-buttons {
-  width: 100px;
-  float: left;
+  margin: 10px;
 }
 
 .btn-w-80 {
@@ -87,50 +65,9 @@
   width: 130px;
 }
 
-#tempo {
-  margin: 0 10px;
-  float: left;
-
-  > * {
-    margin: 0 5px;
-    float: left;
-  }
-
-  > .label {
-    width: 100px;
-  }
-  > .slider {
-    width: 200px;
-  }
-}
-
-#bars {
-  margin: 0 10px;
-  float: left;
-
-  > * {
-    margin: 0 5px;
-    float: left;
-  }
-
-  > .label {
-    width: 100px;
-  }
-  > .slider {
-    width: 200px;
-  }
-}
-
-#select-buttons {
-  float: left;
-
-  > button {
-    margin: 0 5px;
-  }
-}
-
 .keyboard {
-  position: relative;
+  position: sticky;
+  left: 0;
 
   > div {
     border: 1px solid black;
@@ -261,7 +198,4 @@
   .active.now {
     background-color: #F6D4D8;
   }
-
-  // 白鍵と黒鍵は隣接色彩で
-  // アクティブとカレントのときは、同じ彩度の変化幅で
 }

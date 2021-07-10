@@ -18,8 +18,9 @@ h2 {
 }
 
 #container {
-  border: 1px solid silver;
+  /* border: 1px solid silver; */
   background-color: white;
+  height: 95vh;
 }
 
 #container * {
@@ -27,14 +28,13 @@ h2 {
 }
 
 #piano-roll {
-  clear: left;
+  overflow: auto;
+  height: 90%
 }
 
-.octave, .top-note {
+.octave {
   display: flex;
 }
-
-
 
 .white-key {
   width: 95px;
@@ -50,37 +50,3 @@ h2 {
   position: absolute;
   border: 1px solid gray;
 }
-
-
-
-/*
-.w-key.active {
-  background-color: #e7feff;
-}
-
-.active-current {
-  background-color: #f5deb3;
-}
-
-.now {
-  background-color: #eff7ff;
-}
-*/
-/* tr:nth-child(odd) {
-  background-color: #e7feff;
-}
-
-tr:nth-child(even) {
-  background-color: #d4f1f9;
-} */
-/*
-レイアウトはとりあえずこれでOK
-懸念点は描画スピード。鍵盤が増えたり、尺が伸びたときの影響が心配。
-
-次にやること
-・ローカルにうつして、Git管理しようかな？
-・マウスホバー、currentStep で明度を上げる
-・音によって色を変える　
-.active:nth-child(11) でできるかな？
-
-*/

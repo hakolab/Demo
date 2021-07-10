@@ -87,10 +87,6 @@ function find(fromData, toData) {
     }
   });
 
-  if (toToneIndex === -1) {
-    //console.log("no same tone");
-  }
-
   return { fromOctaveIndex, fromToneIndex, toOctaveIndex, toToneIndex };
 }
 
