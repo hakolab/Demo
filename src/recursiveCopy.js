@@ -1,79 +1,4 @@
 import "./styles.css";
-import { oneOctave, toyPiano } from "./data";
-
-const fromData = [
-  {
-    octave: 6,
-    tones: [{ pitchName: "E" }, { pitchName: "D" }, { pitchName: "C" }]
-  },
-  {
-    octave: 5,
-    tones: [{ pitchName: "E" }, { pitchName: "D" }, { pitchName: "C" }]
-  }
-];
-
-const toData = [
-  {
-    octave: 7,
-    tones: [{ pitchName: "E" }, { pitchName: "D" }, { pitchName: "C" }]
-  },
-  {
-    octave: 6,
-    tones: [{ pitchName: "E" }, { pitchName: "D" }, { pitchName: "C" }]
-  },
-  {
-    octave: 5,
-    tones: [{ pitchName: "E" }, { pitchName: "D" }, { pitchName: "C" }]
-  },
-  {
-    octave: 4,
-    tones: [{ pitchName: "E" }, { pitchName: "D" }, { pitchName: "C" }]
-  }
-];
-
-const fromTones = [
-  [
-    [true, false, false],
-    [false, true, false],
-    [false, false, true]
-  ],
-  [
-    [false, false, true],
-    [false, true, false],
-    [true, false, false]
-  ]
-];
-
-const toTones = [
-  [
-    [false, false, false],
-    [false, false, false],
-    [false, false, false]
-  ],
-  [
-    [false, false, false],
-    [false, false, false],
-    [false, false, false]
-  ],
-  [
-    [false, false, false],
-    [false, false, false],
-    [false, false, false]
-  ],
-  [
-    [false, false, false],
-    [false, false, false],
-    [false, false, false]
-  ]
-];
-
-const a = [1, 2, 3];
-const b = [5, 5, 5, 5, 6];
-function exec(fromTones, toTones, fromData, toData) {
-  const result = copy(fromTones, toTones, fromData, toData);
-  //const result = copyArray(a, b);
-  console.log(result);
-}
 
 /**
  *
@@ -83,18 +8,19 @@ function exec(fromTones, toTones, fromData, toData) {
  * @param {*} toData コピー先音定義データ
  */
 function copy(fromTones, toTones, fromData, toData) {
+  let newFromData = clone(fromData);
   // from の最低音と一致する音を to から探す
-  const result = find(fromData, toData);
+  const result = find(newFromData, toData);
 
   // 探索終了（コピー後の配列を返す）
-  if (fromData.length === 0) {
-    console.log("process end");
+  if (newFromData.length === 0) {
+    //console.log("process end");
     return toTones;
   }
 
   // 一致した音があるかどうか
   if (result.toOctaveIndex !== -1 && result.toToneIndex !== -1) {
-    console.log("copy");
+    //console.log("copy");
 
     toTones[result.toOctaveIndex][result.toToneIndex] = copyArray(
       fromTones[result.fromOctaveIndex][result.fromToneIndex],
@@ -103,28 +29,32 @@ function copy(fromTones, toTones, fromData, toData) {
   }
 
   // fromData の最低音を削除して再帰処理
-  fromData[fromData.length - 1].tones.pop();
-  console.log("recursive");
-  return copy(fromTones, toTones, fromData, toData);
+  newFromData[newFromData.length - 1].tones.pop();
+  //console.log("recursive");
+  return copy(fromTones, toTones, newFromData, toData);
 }
 
 function find(fromData, toData) {
+  //console.log('fromData')
+  //console.log(fromData)
   let fromOctaveIndex = -1;
   let fromToneIndex = -1;
   let toOctaveIndex = -1;
   let toToneIndex = -1;
-
+  
   // fromData 探索終了
   if (fromData.length === 0) {
+    //console.log("fromData.length === 0")
     return { fromOctaveIndex, fromToneIndex, toOctaveIndex, toToneIndex };
   }
 
   // from の最低音を取得
+  //console.log(Array.isArray(fromData))
   fromOctaveIndex = fromData.length - 1;
   fromToneIndex = fromData[fromOctaveIndex].tones.length - 1;
 
   if (fromData[fromOctaveIndex].tones.length === 0) {
-    console.log("tones 探索終了");
+    //console.log("tones 探索終了");
     fromData.pop();
     return find(fromData, toData);
   }
@@ -140,7 +70,7 @@ function find(fromData, toData) {
   });
 
   if (filteredItemOfTo.length === 0) {
-    console.log("not found");
+    //console.log("not found");
     return { fromOctaveIndex, fromToneIndex, toOctaveIndex, toToneIndex };
   }
 
@@ -165,36 +95,81 @@ function find(fromData, toData) {
 }
 
 function copyArray(fromTone, toTone, index = 0) {
-  console.log(index);
+  //console.log(toTone);
   if (fromTone.length === index || toTone.length === index) {
     return toTone;
   }
+  
   const newToTone = toTone.slice();
-  newToTone[index] = fromTone[index];
+  if (Array.isArray(fromTone[index])){
+    newToTone[index] = copyArray(fromTone[index], newToTone[index]);
+  } else {
+    newToTone[index] = fromTone[index];
+  }
+  
 
   return copyArray(fromTone, newToTone, index + 1);
 }
 
 function deepCopy(from) {
-  const result = {};
+  const result = [];
   for (let item in from) {
-    if (typeof item === "object") {
+    if (Array.isArray(from[item])){
+      let array = from[item].slice()
+      result[item] = array.slice()
+    } else if (typeof from[item] === "object") {
       result[item] = deepCopy(from[item]);
     } else {
+      //console.log(from[item])
       result[item] = from[item];
     }
   }
   return result;
 }
 
-// prettier-ignore
-export default function App() {
-  return (
-    <div className="App">
-      <h1>Hello CodeSandbox</h1>
-      <h2>Edit to see some magic happen!</h2>
-      <button onClick={() => console.log(exec(fromTones ,toTones, fromData, toData))}>calc</button>
-      <p></p>
-    </div>
-  );
+function clone(from) {
+  if (Array.isArray(from)) {
+    return cloneArray(from);
+  }
+
+  if (typeof from === "object") {
+    return cloneObject(from);
+  }
+}
+
+function cloneArray(array) {
+  let result = [];
+  for (let item in array) {
+    if (Array.isArray(array[item])) {
+      result[item] = cloneArray(array[item]);
+    } else if (typeof array[item] === "object") {
+      result[item] = cloneObject(array[item]);
+    } else {
+      result[item] = array[item];
+    }
+  }
+  return result;
+}
+
+function cloneObject(object) {
+  let result = {};
+  for (let item in object) {
+    if (Array.isArray(object[item])) {
+      result[item] = cloneArray(object[item]);
+    } else if (typeof object[item] === "object") {
+      result[item] = cloneObject(object[item]);
+    } else {
+      result[item] = object[item];
+    }
+  }
+  return result;
+}
+
+
+export {
+  copy,
+  find,
+  copyArray,
+  deepCopy,
+  clone
 }

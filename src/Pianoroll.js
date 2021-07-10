@@ -15,6 +15,7 @@ import Paper from '@material-ui/core/Paper';
 import Popper from '@material-ui/core/Popper';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
+import { copy, find, copyArray, deepCopy, clone } from './recursiveCopy'
 
 /*
 
@@ -34,38 +35,47 @@ const initialState = {
   numberOfBars: 4,
   beatIndex: 2,
   noteCount: 32,
-  keyboardType: AppData.oneOctave,
-  notes: AppData.oneOctave.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(32).fill(false)))
+  keyboardType: clone(AppData.toyPiano),
+  notes: AppData.toyPiano.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(32).fill(false)))
 }
 
-function deepCopy(from) {
+/* function deepCopy(from) {
   const result = [];
   for (let item of from) {
     const newItem = Array.isArray(item) ? item.slice() : item;
     result.push(newItem);
   }
   return result;
-}
+} */
 
 function reducer(state, action){
   switch(action.type){
     case "changeNumberOfBars": {
       const newNoteCount = AppData.beatOptions[state.beatIndex].numberOfNotesInBar * action.payload
-      const newNotes = state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false)))
+      const newNotes = copyArray(state.notes, state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false))))
       return {...state, numberOfBars: action.payload, noteCount: newNoteCount, notes: newNotes}
     }
     case "changeBeat": {
       const newNoteCount = AppData.beatOptions[action.payload].numberOfNotesInBar * state.numberOfBars
-      const newNotes = state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false)))
+      const newNotes = copyArray(state.notes, state.keyboardType.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(newNoteCount).fill(false))))
       return {...state, beatIndex: action.payload, noteCount: newNoteCount, notes: newNotes}
     }
     case "changeKeyboard": {
-      const newNotes = action.payload.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false)))
-      return {...state, keyboardType: action.payload, notes: newNotes}
+      console.log("state")
+      console.log(state)
+      const toNotes = copy(
+        state.notes,
+        action.payload.data.map(octaveObj => octaveObj.tones.map(_ =>  new Array(state.noteCount).fill(false))),
+        state.keyboardType.data,
+        action.payload.data)
+
+      return {...state,
+        keyboardType: action.payload,
+        notes: toNotes
+      }
     }
     case "toggleActivationOfNote": {
       const newNotes = deepCopy(state.notes);
-      console.log(newNotes)
       const current = newNotes[action.payload.octave][action.payload.row][action.payload.col];
       newNotes[action.payload.octave][action.payload.row][action.payload.col] = !current;
       return {...state}
@@ -205,6 +215,11 @@ export default function Pianoroll() {
     setOpen(false);
   };
   /** time signature end */
+
+  function changeKeyboard(keyboardType){
+    //console.log(e)
+    
+  }
 
   return (
     <div id="container">
