@@ -11,8 +11,4 @@ export const useButtonStyles = makeStyles(theme => ({
     height: "30px",
     color: theme.palette.primary.dark,
   },
-  icon: {
-    color: theme.palette.primary.dark,
-    
-  }
 }));

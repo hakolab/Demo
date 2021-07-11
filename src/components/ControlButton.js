@@ -13,15 +13,13 @@ export default function ControlButton({start, stop, clear, allClear, isPlaying})
       {
         !isPlaying &&
           <Button type="button" className={classes.common} onClick={start}>
-            <FontAwesomeIcon icon={faPlay} className={classes.icon}/>
-            {/* <PlayArrowIcon size={size} /> */}
+            <FontAwesomeIcon icon={faPlay}/>
           </Button>
       }
       {
         isPlaying &&
           <Button id="stop" type="button" className={classes.common} onClick={stop}>
             <FontAwesomeIcon icon={faStop}/>
-            {/* <StopIcon size={size} /> */}
           </Button>
       }        
       <Button id="clear" type="button" className={classes.common} onClick={clear} disabled={isPlaying}>

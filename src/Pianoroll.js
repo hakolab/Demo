@@ -218,25 +218,6 @@ export default function Pianoroll() {
                 IconLeft={DirectionsWalkIcon}
                 IconRight={DirectionsRunIcon}
                 />
-{/*             <Grid container spacing={1}>
-              <Grid item>
-                <DirectionsWalkIcon/>
-              </Grid>
-              <Grid item xs>
-                  <Slider
-                    value={bpm}
-                    onChange={handleChange}
-                    min={40}
-                    max={200}
-                    onMouseDown={() => setIsChanging(true)}
-                    onChangeCommitted={() => setIsChanging(false)}
-                    disabled={false}
-                  />
-              </Grid>
-              <Grid item>
-                <DirectionsRunIcon />
-              </Grid>
-            </Grid> */}
           </Grid>
         </Grid>
       </Grid>

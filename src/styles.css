@@ -29,7 +29,8 @@ h2 {
 
 #piano-roll {
   overflow: auto;
-  height: 90%
+  height: 90%;
+  margin-right: 10px;
 }
 
 .octave {
