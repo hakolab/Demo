@@ -13,7 +13,7 @@ import { copy, copyArray, deepCopy, clone } from './recursiveCopy'
 import SelectButton from "./components/SelectButton";
 import ControlButton from "./components/ControlButton";
 import ControlSlider from "./components/ControlSlider";
-import { BrowserView, MobileView } from "react-device-detect";
+import { BrowserView, MobileView, isIOS } from "react-device-detect";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { useButtonStyles } from "./hooks/useButtonStyles";
@@ -265,7 +265,14 @@ export default function Pianoroll() {
             <Button color="primary" variant="outlined" className={classes.common} onClick={() => toggleDrawer(true)}>
               <FontAwesomeIcon icon={faCog}/>
             </Button>
-            <Drawer anchor="top" open={open} onClose={() => toggleDrawer(false)} variant="persistent">
+            <SwipeableDrawer
+              anchor="top"
+              open={open}
+              onOpen={() => toggleDrawer(false)}
+              onClose={() => toggleDrawer(false)}
+              disableBackdropTransition={!isIOS}
+              disableDiscovery={isIOS}
+              >
               <Box display="flex">
                 <Box m={1}>
                   <SelectButton
@@ -302,7 +309,7 @@ export default function Pianoroll() {
                   <ExpandLessIcon />
                 </IconButton>
               </Box>
-            </Drawer>
+            </SwipeableDrawer>
           </Box>
         </Box>
       </MobileView>
