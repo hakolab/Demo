@@ -1,9 +1,10 @@
 import React, { useState, useReducer, useRef } from "react";
 import * as Tone from "tone";
-import { Grid, Box, Slider, useTheme } from "@material-ui/core";
+import { Grid, Box, Button, Drawer, IconButton, SwipeableDrawer } from "@material-ui/core";
 import DirectionsWalkIcon from '@material-ui/icons/DirectionsWalk';
 import DirectionsRunIcon from '@material-ui/icons/DirectionsRun';
 import DragHandleIcon from '@material-ui/icons/DragHandle';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import ReorderIcon from '@material-ui/icons/Reorder';
 import * as AppData from "./AppData";
 import './styles.css'
@@ -12,6 +13,10 @@ import { copy, copyArray, deepCopy, clone } from './recursiveCopy'
 import SelectButton from "./components/SelectButton";
 import ControlButton from "./components/ControlButton";
 import ControlSlider from "./components/ControlSlider";
+import { BrowserView, MobileView } from "react-device-detect";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCog } from "@fortawesome/free-solid-svg-icons";
+import { useButtonStyles } from "./hooks/useButtonStyles";
 
 const initialState = {
   numberOfBars: 4,
@@ -78,6 +83,8 @@ export default function Pianoroll() {
   const [bpm, setBpm] = useState(Tone.Transport.bpm.value);
   /** スライダー操作中フラグ */
   const [isChanging, setIsChanging] = useState(false);
+
+  const classes = useButtonStyles();
 
   function handleMouseDown(event, octave, row, col) {
     // 要素をドラッグしようとするのを防ぐ
@@ -158,27 +165,78 @@ export default function Pianoroll() {
     Tone.Transport.bpm.value = 120;
   }
 
+  const [open, setOpen] = useState(false)
+  function toggleDrawer(open){
+    setOpen(open)
+  }
+
   return (
     <div id="container">
-      <Grid id="controller" container spacing={1}>
-        <Grid container item xs={12}>
-          <Box m={1}>
-            <SelectButton
-              data={AppData.getKeyboardsName()}
-              onClick={dispatch}
-              action="changeKeyboard"
-              disabled={transportState === "started"}
-              />
-          </Box>  
-          <Box m={1}>
-            <SelectButton
-              data={AppData.getBeatsName()}
-              onClick={dispatch}
-              action="changeBeat"
-              disabled={transportState === "started"}
-              size="small"
-              />
-          </Box>
+      <BrowserView>
+        <Grid id="controller" container spacing={1}>
+          <Grid container item xs={12}>
+            <Box m={1}>
+              <SelectButton
+                data={AppData.getKeyboardsName()}
+                onClick={dispatch}
+                action="changeKeyboard"
+                disabled={transportState === "started"}
+                />
+            </Box>
+            <Box m={1}>
+              <SelectButton
+                data={AppData.getBeatsName()}
+                onClick={dispatch}
+                action="changeBeat"
+                disabled={transportState === "started"}
+                size="small"
+                />
+            </Box>
+            <Box m={1}>
+              <ControlButton
+                start={start}
+                stop={stop}
+                clear={clearNotes}
+                allClear={clearAll}
+                isPlaying={transportState === "started"}
+                />
+            </Box>
+          </Grid>
+          <Grid container spacing={2}item xs={12}>
+            <Grid item xs={12} sm={6}>
+              <ControlSlider
+                value={state.numberOfBars}
+                onChange={handleChangeBars}
+                min={2}
+                max={16}
+                onMouseDown={() => setIsChanging(true)}
+                onChangeCommitted={() => setIsChanging(false)}
+                disabled={transportState === "started"}
+                iconRotate={true}
+                IconLeft={DragHandleIcon}
+                IconRight={ReorderIcon}
+                />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <ControlSlider
+                  value={bpm}
+                  onChange={handleChange}
+                  min={40}
+                  max={200}
+                  onMouseDown={() => setIsChanging(true)}
+                  onChangeCommitted={() => setIsChanging(false)}
+                  disabled={false}
+                  valueLabelDisplay="auto"
+                  iconRotate={false}
+                  IconLeft={DirectionsWalkIcon}
+                  IconRight={DirectionsRunIcon}
+                  />
+            </Grid>
+          </Grid>
+        </Grid>
+      </BrowserView>
+      <MobileView>
+        <Box display="flex">
           <Box m={1}>
             <ControlButton
               start={start}
@@ -188,39 +246,66 @@ export default function Pianoroll() {
               isPlaying={transportState === "started"}
               />
           </Box>
-        </Grid>
-        <Grid container spacing={2}item xs={12}>
-          <Grid item xs={12} sm={6}>
+          <Box m={1} flexGrow={1}>
             <ControlSlider
-              value={state.numberOfBars}
-              onChange={handleChangeBars}
-              min={2}
-              max={16}
+              value={bpm}
+              onChange={handleChange}
+              min={40}
+              max={200}
               onMouseDown={() => setIsChanging(true)}
               onChangeCommitted={() => setIsChanging(false)}
-              disabled={transportState === "started"}
-              iconRotate={true}
-              IconLeft={DragHandleIcon}
-              IconRight={ReorderIcon}
+              disabled={false}
+              valueLabelDisplay="auto"
+              iconRotate={false}
+              IconLeft={DirectionsWalkIcon}
+              IconRight={DirectionsRunIcon}
               />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <ControlSlider
-                value={bpm}
-                onChange={handleChange}
-                min={40}
-                max={200}
+          </Box>
+          <Box my={1} mx={3}>
+            <Button color="primary" variant="outlined" className={classes.common} onClick={() => toggleDrawer(true)}>
+              <FontAwesomeIcon icon={faCog}/>
+            </Button>
+            <Drawer anchor="top" open={open} onClose={() => toggleDrawer(false)} variant="persistent">
+              <Box display="flex">
+                <Box m={1}>
+                  <SelectButton
+                    data={AppData.getKeyboardsName()}
+                    onClick={dispatch}
+                    action="changeKeyboard"
+                    disabled={transportState === "started"}
+                    />
+                </Box>
+                <Box m={1}>
+                  <SelectButton
+                    data={AppData.getBeatsName()}
+                    onClick={dispatch}
+                    action="changeBeat"
+                    disabled={transportState === "started"}
+                    size="small"
+                    />
+                </Box>
+              </Box>
+              <ControlSlider
+                value={state.numberOfBars}
+                onChange={handleChangeBars}
+                min={2}
+                max={16}
                 onMouseDown={() => setIsChanging(true)}
                 onChangeCommitted={() => setIsChanging(false)}
-                disabled={false}
-                valueLabelDisplay="auto"
-                iconRotate={false}
-                IconLeft={DirectionsWalkIcon}
-                IconRight={DirectionsRunIcon}
+                disabled={transportState === "started"}
+                iconRotate={true}
+                IconLeft={DragHandleIcon}
+                IconRight={ReorderIcon}
                 />
-          </Grid>
-        </Grid>
-      </Grid>
+              <Box m={1} textAlign="center">
+                <IconButton className={classes.common} onClick={() => toggleDrawer(false)}>
+                  <ExpandLessIcon />
+                </IconButton>
+              </Box>
+            </Drawer>
+          </Box>
+        </Box>
+      </MobileView>
       <div id="piano-roll">
       {
         state.keyboard.data.map((octaveObj, octaveIndex) => {
