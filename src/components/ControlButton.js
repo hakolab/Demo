@@ -25,7 +25,7 @@ export default function ControlButton({start, stop, clear, allClear, isPlaying})
       <Button id="clear" type="button" className={classes.common} onClick={clear} disabled={isPlaying}>
         <FontAwesomeIcon icon={faEraser}/>
       </Button>
-      <Button id="clear-all" type="button" className={classes.common} onClick={allClear} disabled={isPlaying}>
+      <Button id="clear-all" type="button" className={classes.common, classes.danger} onClick={allClear} disabled={isPlaying}>
         <FontAwesomeIcon icon={faTrashAlt}/>
       </Button>
     </ButtonGroup>
