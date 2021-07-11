@@ -1,5 +1,4 @@
 import { makeStyles } from '@material-ui/core';
-import { alpha } from '@material-ui/core/styles';
 
 export const useButtonStyles = makeStyles(theme => ({
   common: {
@@ -12,7 +11,17 @@ export const useButtonStyles = makeStyles(theme => ({
     height: "30px",
     color: theme.palette.primary.dark,
   },
-  danger: {
+  ok: {
+    color: theme.palette.success.main
+  },
+  dangerColor: {
+    color: theme.palette.error.main,
+  },
+  dangerButton: {
+    color: theme.palette.error.main,
+    border: "1px solid " + theme.palette.error.main, 
+  },
+  dangerHover: {
     transition: theme.transitions.create(['color', 'border'], {
       duration: theme.transitions.duration.short,
     }),

@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useRef } from "react";
+import React, { useState, useReducer, useRef, useEffect } from "react";
 import * as Tone from "tone";
 import { Grid, Box, Button, Drawer, IconButton, SwipeableDrawer } from "@material-ui/core";
 import DirectionsWalkIcon from '@material-ui/icons/DirectionsWalk';
@@ -13,10 +13,11 @@ import { copy, copyArray, deepCopy, clone } from './recursiveCopy'
 import SelectButton from "./components/SelectButton";
 import ControlButton from "./components/ControlButton";
 import ControlSlider from "./components/ControlSlider";
-import { BrowserView, MobileView, isIOS } from "react-device-detect";
+import { BrowserView, MobileView, isIOS, isMobile } from "react-device-detect";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import { useButtonStyles } from "./hooks/useButtonStyles";
+import AlertDialog from "./components/AlertDialog";
 
 const initialState = {
   numberOfBars: 4,
@@ -87,6 +88,7 @@ export default function Pianoroll() {
   const classes = useButtonStyles();
 
   function handleMouseDown(event, octave, row, col) {
+    console.log('mouse')
     // 要素をドラッグしようとするのを防ぐ
     event.preventDefault();
     dispatch({type: "toggleActivationOfNote", payload: {octave, row, col}})
@@ -114,6 +116,7 @@ export default function Pianoroll() {
       synth.triggerAttackRelease(playNotes, "8t", time);
       setCurrentStep(step);
     }, steps).start(0);
+
     Tone.Transport.start();
     setTransportState(Tone.Transport.state);
 
@@ -143,7 +146,7 @@ export default function Pianoroll() {
     });
     return playNotes;
   }
-  /** time signature */
+
   function handleChange(event, newValue) {
     setBpm(newValue);
     Tone.Transport.bpm.value = newValue;
@@ -165,10 +168,67 @@ export default function Pianoroll() {
     Tone.Transport.bpm.value = 120;
   }
 
-  const [open, setOpen] = useState(false)
-  function toggleDrawer(open){
-    setOpen(open)
+  const [openDrawer, setOpenDrawer] = useState(false)
+  function toggleDrawer(openDrawer){
+    setOpenDrawer(openDrawer)
   }
+
+  const [targetNoteId, setTargetNoteId] = useState(null)
+
+  const [openDialog, setOpenDialog] = useState(false);
+
+  function handleClickOk(){
+    setOpenDialog(false)
+  }
+
+  useEffect(() => {
+    if(isMobile){
+      setOpenDialog(true)
+      window.addEventListener('touchstart', handleTouchStart, { passive: false })
+
+      function handleTouchStart(event){
+        const pageX = event.touches[0].pageX
+        const pageY = event.touches[0].pageY
+        const element = document.elementFromPoint(pageX,pageY)
+
+        // 要素が取得できなかったら何もしない
+        if(element === null){
+          return
+        }
+        // セルがクリックされていたら音を更新して終了
+        if(element.id.startsWith('note[')){
+          setTargetNoteId(element.id)
+          dispatch({type: "toggleActivationOfNote", payload: {octave: element.dataset.octave, row: element.dataset.tone, col: element.dataset.note}})
+          console.log('start')
+
+          function handleTouchMove(e){
+            console.log('move')
+            const pageX = e.touches[0].pageX
+            const pageY = e.touches[0].pageY
+            const element = document.elementFromPoint(pageX,pageY)
+            if(element === null || element.id.startsWith('note[') === false){
+              return
+            }
+            if(targetNoteId !== element.id){
+              setTargetNoteId(element.id)
+              dispatch({type: "toggleActivationOfNote", payload: {octave: element.dataset.octave, row: element.dataset.tone, col: element.dataset.note}})
+            }
+          }
+  
+          function handleTouchEnd(){
+            console.log('end')
+            window.removeEventListener('touchmove', handleTouchMove, { passive: false })
+            window.removeEventListener('touchend', handleTouchEnd, { passive: false })
+          }
+
+          window.addEventListener('touchmove', handleTouchMove, { passive: false })
+          window.addEventListener('touchend', handleTouchEnd, { passive: false })
+
+          event.preventDefault()
+        }
+      }
+    }
+  },[])
 
   return (
     <div id="container">
@@ -236,6 +296,13 @@ export default function Pianoroll() {
         </Grid>
       </BrowserView>
       <MobileView>
+        <AlertDialog
+          open={openDialog}
+          title={"WELCOME"}
+          text={"ピアノロールは横画面にのみ対応しています！"}
+          confirm={false}
+          onClickOk={handleClickOk}
+        />
         <Box display="flex">
           <Box m={1}>
             <ControlButton
@@ -267,7 +334,7 @@ export default function Pianoroll() {
             </Button>
             <SwipeableDrawer
               anchor="top"
-              open={open}
+              open={openDrawer}
               onOpen={() => toggleDrawer(false)}
               onClose={() => toggleDrawer(false)}
               disableBackdropTransition={!isIOS}
@@ -317,7 +384,7 @@ export default function Pianoroll() {
       {
         state.keyboard.data.map((octaveObj, octaveIndex) => {
           return (
-            <div className="octave">
+            <div id={`octave:${octaveObj.octave}`} key={`octave:${octaveObj.octave}`} className="octave">
               <div className={`keyboard ${state.keyboard.mode}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
@@ -331,17 +398,22 @@ export default function Pianoroll() {
                       rowClassName += ' bottom'
                     }
                     return (
-                      <div className={`${rowClassName} ${tone.pitchName}`}></div>
+                      <div
+                        id={`key:${tone.pitchName}${octaveObj.octave}`}
+                        key={`key:${tone.pitchName}${octaveObj.octave}`}
+                        className={`${rowClassName} ${tone.pitchName}`}
+                        >
+                        </div>
                     )
                   })
                 }
               </div>
-              <div className={`grid ${state.beat.mode}`}>
+              <div id="grid-roll" className={`grid ${state.beat.mode}`}>
                 {
                   octaveObj.tones.map((tone, toneIndex) => {
                     let rowClassName =octaveObj.bKeyIndex.indexOf(toneIndex) >= 0 ? "b-key" : "w-key";
                     return (
-                      <div className={`row ${rowClassName} ${tone.pitchName}`}>
+                      <div id={`tone:${tone.pitchName}`} key={`tone:${tone.pitchName}`} className={`row ${rowClassName} ${tone.pitchName}`}>
                         {
                           state.notes[octaveIndex][toneIndex].map((note, noteIndex) => {
                             // 選択されているか
@@ -352,7 +424,11 @@ export default function Pianoroll() {
                             }
                             return (
                               <div
-                                key={`${tone.pitchName}${tone.octave}${noteIndex}`}
+                                id={`note[${tone.pitchName}${octaveObj.octave}]:${noteIndex}`}
+                                key={`note[${tone.pitchName}${octaveObj.octave}]:${noteIndex}`}
+                                data-octave={octaveIndex}
+                                data-tone={toneIndex}
+                                data-note={noteIndex}
                                 onMouseDown={(event) =>
                                   handleMouseDown(event, octaveIndex, toneIndex, noteIndex)
                                 }
