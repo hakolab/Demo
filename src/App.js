@@ -1,44 +1,46 @@
-import React, { Fragment, useState } from 'react';
-import { createMuiTheme, ThemeProvider, makeStylesm, useTheme, useMediaQuery } from '@material-ui/core'
-import { orange } from '@material-ui/core/colors';
+import React from 'react'
+import { Button } from '@material-ui/core'
+import { createMuiTheme } from '@material-ui/core'
+import { Grid } from './Grid'
+import { ThemeProvider } from '@material-ui/styles';
 
 const theme = createMuiTheme({
   breakpoints: {
-    keys: ["xs", "tiny", "sm", "md", "lg", "xl", ],
+    keys: ["spPortrait", "spLandscape", "pc"],
     values: {
-      xs: 0,
-      tiny: 430,
-      sm: 600,
-      md: 960,
-      lg: 1280,
-      xl: 1920,
-    }
+      spPortrait: 0,
+      spLandscape: 520,
+      pc: 960
+    },
   },
-});
+})
 
-
-
-function CustomDiv(){
-  const _theme = useTheme()
-  console.log(_theme.breakpoints)
-  const match = useMediaQuery(_theme.breakpoints.down('tiny'))
-  //const match = useMediaQuery('(min-width:600px)')
+export const App = () => {
   return (
     <div>
-      {match ? "true" : "false"}
+      <ThemeProvider theme={theme}>
+        <Grid container>
+          <Grid item spPortrait={6} spLandscape={4}>
+            <Button variant="contained" color="primary">test</Button>
+          </Grid>
+          <Grid item  spPortrait={6} spLandscape={4} pc={2}>
+            <Button variant="contained" color="primary">test</Button>
+          </Grid>
+          <Grid item  spPortrait={6} spLandscape={4} pc={2}>
+            <Button variant="contained" color="primary">test</Button>
+          </Grid>
+          <Grid item  spPortrait={6} spLandscape={4} pc={2}>
+            <Button variant="contained" color="primary">test</Button>
+          </Grid>
+          <Grid item  spPortrait={6} spLandscape={4} pc={2}>
+            <Button variant="contained" color="primary">test</Button>
+          </Grid>
+          <Grid item  spPortrait={6} spLandscape={4} pc={2}>
+            <Button variant="contained" color="primary">test</Button>
+          </Grid>
+        </Grid>
+      </ThemeProvider>
     </div>
+
   )
 }
-
-function App() {
-
-  return (
-    <Fragment>
-      <ThemeProvider theme={theme}>
-        <CustomDiv />
-      </ThemeProvider>
-    </Fragment>
-  );
-}
-
-export default App
